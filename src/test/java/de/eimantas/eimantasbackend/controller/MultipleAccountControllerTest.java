@@ -6,7 +6,10 @@ import de.eimantas.eimantasbackend.repo.AccountRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.keycloak.KeycloakPrincipal;
+import org.keycloak.adapters.RefreshableKeycloakSecurityContext;
 import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
+import org.keycloak.representations.AccessToken;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -85,8 +88,18 @@ public class MultipleAccountControllerTest {
 
         accountRepository.deleteAll();
 
+        // auth stuff
         mockPrincipal = Mockito.mock(KeycloakAuthenticationToken.class);
-        Mockito.when(mockPrincipal.getName()).thenReturn("test@test.de");
+        Mockito.when(mockPrincipal.getName()).thenReturn("test");
+
+        KeycloakPrincipal keyPrincipal = Mockito.mock(KeycloakPrincipal.class);
+        RefreshableKeycloakSecurityContext ctx = Mockito.mock(RefreshableKeycloakSecurityContext.class);
+
+        AccessToken token = Mockito.mock(AccessToken.class);
+        Mockito.when(token.getSubject()).thenReturn("1L");
+        Mockito.when(ctx.getToken()).thenReturn(token);
+        Mockito.when(keyPrincipal.getKeycloakSecurityContext()).thenReturn(ctx);
+        Mockito.when(mockPrincipal.getPrincipal()).thenReturn(keyPrincipal);
 
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
 
@@ -95,34 +108,16 @@ public class MultipleAccountControllerTest {
 
 
         accountRepository.save(acc);
-        acc.setUserId(1L);
+        acc.setUserId("1L");
 
 
         acc2 = TestUtils.getAccount();
 
         accountRepository.save(acc2);
-        acc2.setUserId(1L);
+        acc2.setUserId("1L");
 
     }
 
-    @Test
-    @Transactional
-    public void readOverview() throws Exception {
-        // given(controller.principal).willReturn(allEmployees);
-        mockMvc.perform(get("/account/overview/" + acc.getId()).principal(mockPrincipal)).andExpect(status().isOk())
-                .andDo(MockMvcResultHandlers.print()).andExpect(content().contentType(contentType))
-                .andExpect(jsonPath("$.refAccountId", is(acc.getId().intValue())))
-                .andExpect(jsonPath("$.total", is(180)))
-                .andExpect(jsonPath("$.countExpenses", is(18)));
-
-
-        mockMvc.perform(get("/account/overview/" + acc2.getId()).principal(mockPrincipal)).andExpect(status().isOk())
-                .andDo(MockMvcResultHandlers.print()).andExpect(content().contentType(contentType))
-                .andExpect(jsonPath("$.refAccountId", is(acc2.getId().intValue())))
-                .andExpect(jsonPath("$.total", is(180)))
-                .andExpect(jsonPath("$.countExpenses", is(18)));
-
-    }
 
 
     @Test
@@ -154,38 +149,16 @@ public class MultipleAccountControllerTest {
                 .andExpect(jsonPath("$.[0].active", is(acc.isActive())))
                 .andExpect(jsonPath("$.[0].bank", is(acc.getBank())))
                 .andExpect(jsonPath("$.[0].name", is(acc.getName())))
-                .andExpect(jsonPath("$.[0].expensescount", is(1)))
-                .andExpect(jsonPath("$.[0].user.id", is(1)))
+                .andExpect(jsonPath("$.[0].userId", is("1L")))
                 .andExpect(jsonPath("$.[1].id", is(acc2.getId().intValue())))
                 .andExpect(jsonPath("$.[1].active", is(acc2.isActive())))
                 .andExpect(jsonPath("$.[1].bank", is(acc2.getBank())))
                 .andExpect(jsonPath("$.[1].name", is(acc2.getName())))
-                .andExpect(jsonPath("$.[1].expensescount", is(12)))
-                .andExpect(jsonPath("$.[1].user.id", is(0L)));
+                .andExpect(jsonPath("$.[1].userId", is("1L")));
 
 
     }
 
-
-    @Test
-    @Transactional
-    public void testGetExpensesOverview() throws Exception {
-
-        // given(controller.principal).willReturn(allEmployees);
-        mockMvc.perform(get("/account/overview/expenses/" + acc.getId()).principal(mockPrincipal)).andExpect(status().isOk())
-                .andDo(MockMvcResultHandlers.print()).andExpect(content().contentType(contentType))
-                .andExpect(jsonPath("$.accountName", is("testname")))
-                .andExpect(jsonPath("$.refAccountId", is(acc.getId().intValue())))
-                .andExpect(jsonPath("$.totalExpensesCount", is(18)))
-                .andExpect(jsonPath("$.total", is(180)))
-                .andExpect(jsonPath("$.countExpenses", is(18)))
-                .andExpect(jsonPath("$.categoryAndCountList[0].category", is("STEUER")))
-                .andExpect(jsonPath("$.categoryAndCountList[0].count", is(18)));
-        //  .andExpect(jsonPath("$.categoryAndAmountList[0].name", is("STEUER")))
-        //  .andExpect(jsonPath("$.categoryAndAmountList[0].amount", is(30)));
-
-
-    }
 
 
 }

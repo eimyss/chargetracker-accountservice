@@ -4,7 +4,10 @@ import de.eimantas.eimantasbackend.repo.AccountRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.keycloak.KeycloakPrincipal;
+import org.keycloak.adapters.RefreshableKeycloakSecurityContext;
 import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
+import org.keycloak.representations.AccessToken;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -57,6 +60,15 @@ public class SecurityServiceTest {
         mockPrincipal = Mockito.mock(KeycloakAuthenticationToken.class);
         Mockito.when(mockPrincipal.getName()).thenReturn("test");
 
+        KeycloakPrincipal keyPrincipal = Mockito.mock(KeycloakPrincipal.class);
+        RefreshableKeycloakSecurityContext ctx = Mockito.mock(RefreshableKeycloakSecurityContext.class);
+
+        AccessToken token = Mockito.mock(AccessToken.class);
+        Mockito.when(token.getSubject()).thenReturn("Subject-111");
+        Mockito.when(ctx.getToken()).thenReturn(token);
+        Mockito.when(keyPrincipal.getKeycloakSecurityContext()).thenReturn(ctx);
+        Mockito.when(mockPrincipal.getPrincipal()).thenReturn(keyPrincipal);
+
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
 
 
@@ -66,7 +78,7 @@ public class SecurityServiceTest {
     @Test
     public void testGetIdByMock() throws Exception {
 
-        Long accId = securityService.getUserIdFromPrincipal(mockPrincipal);
+        String accId = securityService.getUserIdFromPrincipal(mockPrincipal);
         assertThat(accId).isNotNull();
 
     }
@@ -74,7 +86,7 @@ public class SecurityServiceTest {
     @Test(expected = SecurityException.class)
     public void testGetIdByMockNoPrincipal() throws Exception {
 
-        Long accId = securityService.getUserIdFromPrincipal(null);
+        String accId = securityService.getUserIdFromPrincipal(null);
         assertThat(accId).isNotNull();
 
     }

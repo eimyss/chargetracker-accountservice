@@ -6,7 +6,10 @@ import de.eimantas.eimantasbackend.repo.AccountRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.keycloak.KeycloakPrincipal;
+import org.keycloak.adapters.RefreshableKeycloakSecurityContext;
 import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
+import org.keycloak.representations.AccessToken;
 import org.mockito.Mockito;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,7 +74,17 @@ public class AccountServiceTest {
 
         // auth stuff
         mockPrincipal = Mockito.mock(KeycloakAuthenticationToken.class);
-        Mockito.when(mockPrincipal.getName()).thenReturn("test@test.de");
+        Mockito.when(mockPrincipal.getName()).thenReturn("test");
+
+        KeycloakPrincipal keyPrincipal = Mockito.mock(KeycloakPrincipal.class);
+        RefreshableKeycloakSecurityContext ctx = Mockito.mock(RefreshableKeycloakSecurityContext.class);
+
+        AccessToken token = Mockito.mock(AccessToken.class);
+        Mockito.when(token.getSubject()).thenReturn("Subject-111");
+        Mockito.when(ctx.getToken()).thenReturn(token);
+        Mockito.when(keyPrincipal.getKeycloakSecurityContext()).thenReturn(ctx);
+        Mockito.when(mockPrincipal.getPrincipal()).thenReturn(keyPrincipal);
+
 
 
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
@@ -80,13 +93,13 @@ public class AccountServiceTest {
 
 
         accountRepository.save(acc);
-        acc.setUserId(1L);
+        acc.setUserId("1L");
 
         acc2 = TestUtils.getAccount();
 
 
         accountRepository.save(acc2);
-        acc2.setUserId(1L);
+        acc2.setUserId("1L");
 
 
     }
@@ -95,7 +108,7 @@ public class AccountServiceTest {
     @Test
     public void getTotalAccounts() throws Exception {
 
-        Stream<Account> accounts = accountService.getAccountsByUserId(1L);
+        Stream<Account> accounts = accountService.getAccountsByUserId("1L");
         assertThat(accounts).isNotNull();
         assertThat(((Stream) accounts).count()).isEqualTo(2);
 
@@ -105,7 +118,7 @@ public class AccountServiceTest {
     @Transactional
     public void getExpensesByAccount() throws Exception {
 
-        Stream<Account> accounts = accountService.getAccountsByUserId(1L);
+        Stream<Account> accounts = accountService.getAccountsByUserId("1L");
         assertThat(accounts).isNotNull();
         List<Account> accountList = accounts.collect(Collectors.toList());
         assertThat(accountList.size()).isEqualTo(2);

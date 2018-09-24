@@ -10,6 +10,6 @@ import java.util.stream.Stream;
 
 public interface AccountRepository extends CrudRepository<Account, Long> {
 
-    public Stream<Account> findByUserId(Long userId);
+    public Stream<Account> findByUserId(String userId);
 
 }

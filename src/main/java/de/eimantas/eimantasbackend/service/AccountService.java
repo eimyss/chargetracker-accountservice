@@ -62,7 +62,7 @@ public class AccountService {
         if (authentication == null)
             throw new SecurityException("account cannot be null");
 
-        Long usr = securityService.getOrCreateUserFromPrincipal(authentication);
+        String usr = securityService.getUserIdFromPrincipal(authentication);
 
         if (acc.getId() != null) {
 
@@ -86,24 +86,12 @@ public class AccountService {
     }
 
 
-    public Stream<Account> getAccountsByUserId(long userid) {
+    public Stream<Account> getAccountsByUserId(String userid) {
         // TODO check auth
-
-        if (userid == 0) {
-            logger.warn("no id is passed");
-            // is there empty stream?
-            return Stream.empty();
-        }
-
         return accountRepository.findByUserId(userid);
     }
 
-    public List<AccountDTO> getAccountDtoByUserId(long userId) {
-
-        if (userId == 0) {
-            logger.warn("no id is passed");
-            return Collections.emptyList();
-        }
+    public List<AccountDTO> getAccountDtoByUserId(String userId) {
 
         Stream<Account> accountStream = getAccountsByUserId(userId);
         return accountStream.map(acc -> converter.getAccountDTO(acc)).collect(Collectors.toList());

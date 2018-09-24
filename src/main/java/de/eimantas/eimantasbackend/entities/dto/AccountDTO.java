@@ -28,7 +28,7 @@ public class AccountDTO {
         private String bank;
         private String name;
         private int expensescount;
-        private Long userId;
+        private String userId;
 
 
     }

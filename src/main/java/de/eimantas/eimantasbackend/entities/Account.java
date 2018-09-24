@@ -33,7 +33,7 @@ public class Account {
 	private String bank;
 	private @NonNull String name;
     private int expensesCount;
-	private	Long userId;
+	private	String userId;
 
 
 	@PrePersist

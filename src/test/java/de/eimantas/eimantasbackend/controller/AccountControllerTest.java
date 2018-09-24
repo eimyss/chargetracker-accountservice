@@ -8,7 +8,10 @@ import de.eimantas.eimantasbackend.repo.AccountRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.keycloak.KeycloakPrincipal;
+import org.keycloak.adapters.RefreshableKeycloakSecurityContext;
 import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
+import org.keycloak.representations.AccessToken;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -29,7 +32,8 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -82,24 +86,23 @@ public class AccountControllerTest {
 
         // auth stuff
         mockPrincipal = Mockito.mock(KeycloakAuthenticationToken.class);
-        Mockito.when(mockPrincipal.getName()).thenReturn("test@test.de");
+        Mockito.when(mockPrincipal.getName()).thenReturn("test");
+
+        KeycloakPrincipal keyPrincipal = Mockito.mock(KeycloakPrincipal.class);
+        RefreshableKeycloakSecurityContext ctx = Mockito.mock(RefreshableKeycloakSecurityContext.class);
+
+        AccessToken token = Mockito.mock(AccessToken.class);
+        Mockito.when(token.getSubject()).thenReturn("Subject-111");
+        Mockito.when(ctx.getToken()).thenReturn(token);
+        Mockito.when(keyPrincipal.getKeycloakSecurityContext()).thenReturn(ctx);
+        Mockito.when(mockPrincipal.getPrincipal()).thenReturn(keyPrincipal);
 
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
         acc = TestUtils.getAccount();
+        acc.setUserId("Subject-111");
 
         accountRepository.save(acc);
 
-
-    }
-
-    @Test
-    public void readOverview() throws Exception {
-        // given(controller.principal).willReturn(allEmployees);
-        mockMvc.perform(get("/account/overview/" + acc.getId()).principal(mockPrincipal)).andExpect(status().isOk())
-                .andDo(MockMvcResultHandlers.print()).andExpect(content().contentType(contentType))
-                .andExpect(jsonPath("$.refAccountId", is(acc.getId().intValue())))
-                .andExpect(jsonPath("$.total", is(180)))
-                .andExpect(jsonPath("$.countExpenses", is(18)));
 
     }
 
@@ -130,39 +133,7 @@ public class AccountControllerTest {
                 .andExpect(jsonPath("$.[0].id", is(acc.getId().intValue())))
                 .andExpect(jsonPath("$.[0].active", is(acc.isActive())))
                 .andExpect(jsonPath("$.[0].bank", is(acc.getBank())))
-                .andExpect(jsonPath("$.[0].name", is(acc.getName())))
-                .andExpect(jsonPath("$.[0].expensescount", is(5L)));
-
-
-    }
-
-    @Test
-    public void testGetGlobalOverview() throws Exception {
-
-        // given(controller.principal).willReturn(allEmployees);
-        mockMvc.perform(get("/account/global-overview").principal(mockPrincipal)).andExpect(status().isOk())
-                .andDo(MockMvcResultHandlers.print()).andExpect(content().contentType(contentType))
-                .andExpect(jsonPath("$.monthBack", is(6)))
-                .andExpect(jsonPath("$.userId", is(5)))
-                .andExpect(jsonPath("$.overview." + acc.getId(), hasSize(6)));
-
-    }
-
-    @Test
-    public void testGetExpensesOverview() throws Exception {
-
-        // given(controller.principal).willReturn(allEmployees);
-        mockMvc.perform(get("/account/overview/expenses/" + acc.getId()).principal(mockPrincipal)).andExpect(status().isOk())
-                .andDo(MockMvcResultHandlers.print()).andExpect(content().contentType(contentType))
-                .andExpect(jsonPath("$.accountName", is("testname")))
-                .andExpect(jsonPath("$.refAccountId", is(acc.getId().intValue())))
-                .andExpect(jsonPath("$.totalExpensesCount", is(18)))
-                .andExpect(jsonPath("$.total", is(180)))
-                .andExpect(jsonPath("$.countExpenses", is(18)))
-                .andExpect(jsonPath("$.categoryAndCountList[0].category", is("STEUER")))
-                .andExpect(jsonPath("$.categoryAndCountList[0].count", is(18)));
-        //  .andExpect(jsonPath("$.categoryAndAmountList[0].name", is("STEUER")))
-        //  .andExpect(jsonPath("$.categoryAndAmountList[0].amount", is(30)));
+                .andExpect(jsonPath("$.[0].name", is(acc.getName())));
 
 
     }
@@ -181,8 +152,7 @@ public class AccountControllerTest {
                 .andExpect(jsonPath("$.active", is(true)))
                 .andExpect(jsonPath("$.bank", is("test")))
                 .andExpect(jsonPath("$.name", is("testname")))
-                .andExpect(jsonPath("$.user.id", is(greaterThan(0))))
-                .andExpect(jsonPath("$.user.name", is("test@test.de")));
+                .andExpect(jsonPath("$.userId", is("Subject-111")));
 
     }
 
@@ -201,8 +171,7 @@ public class AccountControllerTest {
                 .andExpect(jsonPath("$.active", is(true)))
                 .andExpect(jsonPath("$.bank", is("test")))
                 .andExpect(jsonPath("$.name", is(name)))
-                .andExpect(jsonPath("$.user.id", is(greaterThan(0))))
-                .andExpect(jsonPath("$.user.name", is("test@test.de")));
+                .andExpect(jsonPath("$.userId", is("Subject-111")));
 
     }
 
@@ -268,39 +237,6 @@ public class AccountControllerTest {
 
         mockMvc.perform(get("/account/list")).andExpect(status().isForbidden())
                 .andDo(MockMvcResultHandlers.print());
-    }
-
-    @Test
-    public void testGetGlobalOverviewNoAuth() throws Exception {
-
-        mockMvc.perform(get("/account/global-overview")).andExpect(status().isForbidden())
-                .andDo(MockMvcResultHandlers.print());
-    }
-
-    @Test
-    public void testGetExpensesOverviewNoID() throws Exception {
-
-        // given(controller.principal).willReturn(allEmployees);
-        mockMvc.perform(get("/account/overview/expenses/0").principal(mockPrincipal)).andExpect(status().isBadRequest())
-                .andDo(MockMvcResultHandlers.print());
-
-    }
-
-    @Test
-    public void testGetExpensesOverviewEmptyID() throws Exception {
-
-
-        // given(controller.principal).willReturn(allEmployees);
-        mockMvc.perform(get("/account/overview/expenses").principal(mockPrincipal)).andExpect(status().isBadRequest());
-
-    }
-
-
-    @Test
-    public void testGetExpensesOverviewNoAuth() throws Exception {
-
-        mockMvc.perform(get("/account/overview/expenses/" + acc.getId())).andExpect(status().isForbidden());
-
     }
 
 
