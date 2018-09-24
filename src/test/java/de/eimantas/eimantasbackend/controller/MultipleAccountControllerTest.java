@@ -30,7 +30,9 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 
+import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.Assert.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -155,6 +157,19 @@ public class MultipleAccountControllerTest {
                 .andExpect(jsonPath("$.[1].bank", is(acc2.getBank())))
                 .andExpect(jsonPath("$.[1].name", is(acc2.getName())))
                 .andExpect(jsonPath("$.[1].userId", is("1L")));
+
+
+    }
+
+    @Test
+    @Transactional
+    public void testGetAccountListIds() throws Exception {
+
+
+        // given(controller.principal).willReturn(allEmployees);
+        mockMvc.perform(get("/account/list/id").principal(mockPrincipal)).andExpect(status().isOk())
+                .andDo(MockMvcResultHandlers.print()).andExpect(content().contentType(contentType))
+                .andExpect(jsonPath("$", hasSize(greaterThan(0))));
 
 
     }

@@ -115,6 +115,15 @@ public class AccountServiceTest {
     }
 
     @Test
+    public void getAQccountListIds() throws Exception {
+
+        List<Long> accounts = accountService.getAccountIds();
+        assertThat(accounts).isNotNull();
+        assertThat(accounts.size()).isEqualTo(2);
+
+    }
+
+    @Test
     @Transactional
     public void getExpensesByAccount() throws Exception {
 

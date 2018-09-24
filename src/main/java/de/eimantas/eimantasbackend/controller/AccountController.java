@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.inject.Inject;
 import java.security.Principal;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -78,6 +79,23 @@ public class AccountController {
         return new ResponseEntity<List<AccountDTO>>(dtos, HttpStatus.OK);
 
     }
+
+    @GetMapping(value = "/list/id", produces = MediaType.APPLICATION_JSON_VALUE)
+    @CrossOrigin(origins = "*")
+    @Transactional
+    public Collection<Long> getAccountsListIds(Principal principal) {
+
+        logger.info("Principal: " + principal.toString());
+        KeycloakAuthenticationToken user = (KeycloakAuthenticationToken) principal;
+
+
+        List<Long> dtos = accountService.getAccountIds();
+
+        logger.info("returning account list size: " + dtos.size());
+        return dtos;
+
+    }
+
 
 
     @PostMapping("/save")

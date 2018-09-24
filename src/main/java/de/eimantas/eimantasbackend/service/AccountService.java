@@ -101,4 +101,8 @@ public class AccountService {
     public boolean isPresentAccount(Long accountId) {
         return accountRepository.existsById(accountId);
     }
+
+    public List<Long> getAccountIds() {
+        return accountRepository.getAllIds();
+    }
 }
