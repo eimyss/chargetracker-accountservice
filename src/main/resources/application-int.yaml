@@ -50,3 +50,5 @@ logging:
   level:
     org.keycloak: INFO
     org.springframework.security: INFO
+server:
+  port: 8190

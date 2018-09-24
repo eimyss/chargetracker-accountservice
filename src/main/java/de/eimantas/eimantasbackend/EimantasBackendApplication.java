@@ -2,6 +2,7 @@ package de.eimantas.eimantasbackend;
 
 import de.eimantas.eimantasbackend.entities.converter.EntitiesConverter;
 import org.modelmapper.ModelMapper;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -19,6 +20,9 @@ import java.util.Collections;
 @EnableDiscoveryClient
 @SpringBootApplication
 public class EimantasBackendApplication {
+
+    private final org.slf4j.Logger logger = LoggerFactory.getLogger(this.getClass());
+
 
     public static void main(String[] args) {
         SpringApplication.run(EimantasBackendApplication.class, args);
