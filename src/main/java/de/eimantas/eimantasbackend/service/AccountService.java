@@ -31,7 +31,6 @@ public class AccountService {
   EntitiesConverter converter;
 
   private final org.slf4j.Logger logger = LoggerFactory.getLogger(this.getClass());
-  private int monthsGoBack = 6;
 
 
   public Optional<Account> getAccountById(long accountId, Principal authentication) {

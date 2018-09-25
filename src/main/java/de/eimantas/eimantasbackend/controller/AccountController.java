@@ -87,9 +87,6 @@ public class AccountController {
   @Transactional
   public Collection<Long> getAccountsListIds(Principal principal) {
 
-    logger.info("Principal: " + principal.toString());
-    KeycloakAuthenticationToken user = (KeycloakAuthenticationToken) principal;
-
 
     List<Long> dtos = accountService.getAccountIds();
 

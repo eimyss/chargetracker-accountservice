@@ -1,7 +1,5 @@
 package de.eimantas.eimantasbackend.helpers;
 
-import org.slf4j.LoggerFactory;
-
 import java.text.SimpleDateFormat;
 import java.time.*;
 import java.time.temporal.IsoFields;
@@ -9,9 +7,6 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.Date;
 
 public class DateHelper {
-
-
-  private static org.slf4j.Logger logger = LoggerFactory.getLogger(DateHelper.class);
 
 
   //testing can be tricky...‚

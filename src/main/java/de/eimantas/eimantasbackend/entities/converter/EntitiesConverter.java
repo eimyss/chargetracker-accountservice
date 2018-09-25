@@ -2,7 +2,6 @@ package de.eimantas.eimantasbackend.entities.converter;
 
 import de.eimantas.eimantasbackend.entities.Account;
 import de.eimantas.eimantasbackend.entities.dto.AccountDTO;
-import de.eimantas.eimantasbackend.repo.AccountRepository;
 import org.modelmapper.ModelMapper;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,9 +13,6 @@ public class EntitiesConverter {
 
   @Autowired
   private ModelMapper modelMapper;
-
-  @Autowired
-  private AccountRepository accountRepository;
 
 
   private final org.slf4j.Logger logger = LoggerFactory.getLogger(this.getClass());

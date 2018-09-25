@@ -1,6 +1,5 @@
 package de.eimantas.eimantasbackend;
 
-import de.eimantas.eimantasbackend.service.SecurityService;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
@@ -18,18 +17,9 @@ public class PostConstructBean implements ApplicationRunner {
 
   private final org.slf4j.Logger logger = LoggerFactory.getLogger(this.getClass());
 
-  private String testUserName = "test";
-
 
   @Autowired
   private Environment environment;
-
-  @Autowired
-  private SecurityService securityService;
-
-  //@PostConstruct
-  //  public void init() {
-  //  }
 
   private void preFillData() {
 

@@ -22,8 +22,6 @@ import java.util.Collections;
 @SpringBootApplication
 public class EimantasBackendApplication {
 
-  private final org.slf4j.Logger logger = LoggerFactory.getLogger(this.getClass());
-
 
   public static void main(String[] args) {
     SpringApplication.run(EimantasBackendApplication.class, args);
