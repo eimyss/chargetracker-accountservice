@@ -12,39 +12,39 @@ import java.util.Optional;
 
 public class EntitiesConverter {
 
-    @Autowired
-    private ModelMapper modelMapper;
+  @Autowired
+  private ModelMapper modelMapper;
 
-    @Autowired
-    private AccountRepository accountRepository;
-
-
-    private final org.slf4j.Logger logger = LoggerFactory.getLogger(this.getClass());
+  @Autowired
+  private AccountRepository accountRepository;
 
 
-    public AccountDTO getAccountDTO(Optional<Account> accountOptional) {
+  private final org.slf4j.Logger logger = LoggerFactory.getLogger(this.getClass());
 
-        if (accountOptional.isPresent()) {
-            Account account = accountOptional.get();
-            AccountDTO postDto = modelMapper.<AccountDTO>map(account, AccountDTO.class);
-            return postDto;
 
-        }
-        logger.info("account is null");
-        return null;
+  public AccountDTO getAccountDTO(Optional<Account> accountOptional) {
+
+    if (accountOptional.isPresent()) {
+      Account account = accountOptional.get();
+      AccountDTO postDto = modelMapper.<AccountDTO>map(account, AccountDTO.class);
+      return postDto;
 
     }
+    logger.info("account is null");
+    return null;
 
-    public AccountDTO getAccountDTO(Account acc) {
-            AccountDTO postDto = modelMapper.<AccountDTO>map(acc, AccountDTO.class);
-            return postDto;
-    }
+  }
 
-    public Account getAccountDTO(AccountDTO dto) {
-        Account postDto = modelMapper.map(dto, Account.class);
-        return postDto;
+  public AccountDTO getAccountDTO(Account acc) {
+    AccountDTO postDto = modelMapper.<AccountDTO>map(acc, AccountDTO.class);
+    return postDto;
+  }
 
-    }
+  public Account getAccountDTO(AccountDTO dto) {
+    Account postDto = modelMapper.map(dto, Account.class);
+    return postDto;
+
+  }
 
 
 }

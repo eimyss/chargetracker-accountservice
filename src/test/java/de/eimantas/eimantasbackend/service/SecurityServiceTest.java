@@ -34,84 +34,84 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 @Transactional
 public class SecurityServiceTest {
 
-    private MediaType contentType = new MediaType(MediaType.APPLICATION_JSON.getType(),
-            MediaType.APPLICATION_JSON.getSubtype(), Charset.forName("utf8"));
+  private MediaType contentType = new MediaType(MediaType.APPLICATION_JSON.getType(),
+      MediaType.APPLICATION_JSON.getSubtype(), Charset.forName("utf8"));
 
-    private MockMvc mockMvc;
-
-
-    @Inject
-    private SecurityService securityService;
-
-    @Inject
-    private AccountRepository accountRepository;
+  private MockMvc mockMvc;
 
 
-    @Autowired
-    private WebApplicationContext webApplicationContext;
+  @Inject
+  private SecurityService securityService;
+
+  @Inject
+  private AccountRepository accountRepository;
 
 
-    private KeycloakAuthenticationToken mockPrincipal;
+  @Autowired
+  private WebApplicationContext webApplicationContext;
 
 
-    @Before
-    public void setup() throws Exception {
-
-        mockPrincipal = Mockito.mock(KeycloakAuthenticationToken.class);
-        Mockito.when(mockPrincipal.getName()).thenReturn("test");
-
-        KeycloakPrincipal keyPrincipal = Mockito.mock(KeycloakPrincipal.class);
-        RefreshableKeycloakSecurityContext ctx = Mockito.mock(RefreshableKeycloakSecurityContext.class);
-
-        AccessToken token = Mockito.mock(AccessToken.class);
-        Mockito.when(token.getSubject()).thenReturn("Subject-111");
-        Mockito.when(ctx.getToken()).thenReturn(token);
-        Mockito.when(keyPrincipal.getKeycloakSecurityContext()).thenReturn(ctx);
-        Mockito.when(mockPrincipal.getPrincipal()).thenReturn(keyPrincipal);
-
-        this.mockMvc = webAppContextSetup(webApplicationContext).build();
+  private KeycloakAuthenticationToken mockPrincipal;
 
 
-    }
+  @Before
+  public void setup() throws Exception {
+
+    mockPrincipal = Mockito.mock(KeycloakAuthenticationToken.class);
+    Mockito.when(mockPrincipal.getName()).thenReturn("test");
+
+    KeycloakPrincipal keyPrincipal = Mockito.mock(KeycloakPrincipal.class);
+    RefreshableKeycloakSecurityContext ctx = Mockito.mock(RefreshableKeycloakSecurityContext.class);
+
+    AccessToken token = Mockito.mock(AccessToken.class);
+    Mockito.when(token.getSubject()).thenReturn("Subject-111");
+    Mockito.when(ctx.getToken()).thenReturn(token);
+    Mockito.when(keyPrincipal.getKeycloakSecurityContext()).thenReturn(ctx);
+    Mockito.when(mockPrincipal.getPrincipal()).thenReturn(keyPrincipal);
+
+    this.mockMvc = webAppContextSetup(webApplicationContext).build();
 
 
-    @Test
-    public void testGetIdByMock() throws Exception {
+  }
 
-        String accId = securityService.getUserIdFromPrincipal(mockPrincipal);
-        assertThat(accId).isNotNull();
 
-    }
+  @Test
+  public void testGetIdByMock() throws Exception {
 
-    @Test(expected = SecurityException.class)
-    public void testGetIdByMockNoPrincipal() throws Exception {
+    String accId = securityService.getUserIdFromPrincipal(mockPrincipal);
+    assertThat(accId).isNotNull();
 
-        String accId = securityService.getUserIdFromPrincipal(null);
-        assertThat(accId).isNotNull();
+  }
 
-    }
+  @Test(expected = SecurityException.class)
+  public void testGetIdByMockNoPrincipal() throws Exception {
 
-    @Test
-    public void testAllowedToRead() throws Exception {
+    String accId = securityService.getUserIdFromPrincipal(null);
+    assertThat(accId).isNotNull();
 
-        boolean accId = securityService.isAllowedToReadAcc(mockPrincipal, 1);
-        assertThat(accId).isTrue();
-    }
+  }
 
-    @Test
-    public void testAllowedToReadNoUser() throws Exception {
-        boolean accId = securityService.isAllowedToReadAcc(mockPrincipal, 0);
-        assertThat(accId).isTrue();
+  @Test
+  public void testAllowedToRead() throws Exception {
 
-    }
+    boolean accId = securityService.isAllowedToReadAcc(mockPrincipal, 1);
+    assertThat(accId).isTrue();
+  }
 
-    @Test(expected = SecurityException.class)
-    public void testAllowedToReadNoPrincipal() throws Exception {
+  @Test
+  public void testAllowedToReadNoUser() throws Exception {
+    boolean accId = securityService.isAllowedToReadAcc(mockPrincipal, 0);
+    assertThat(accId).isTrue();
 
-        boolean accId = securityService.isAllowedToReadAcc(null, 1);
-        assertThat(accId).isTrue();
+  }
 
-    }
+  @Test(expected = SecurityException.class)
+  public void testAllowedToReadNoPrincipal() throws Exception {
+
+    boolean accId = securityService.isAllowedToReadAcc(null, 1);
+    assertThat(accId).isTrue();
+
+  }
 
 
 }

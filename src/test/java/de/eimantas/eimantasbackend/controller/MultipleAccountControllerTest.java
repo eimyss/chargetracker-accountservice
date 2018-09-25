@@ -46,134 +46,132 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 @ActiveProfiles("test")
 public class MultipleAccountControllerTest {
 
-    private MediaType contentType = new MediaType(MediaType.APPLICATION_JSON.getType(),
-            MediaType.APPLICATION_JSON.getSubtype(), Charset.forName("utf8"));
+  private MediaType contentType = new MediaType(MediaType.APPLICATION_JSON.getType(),
+      MediaType.APPLICATION_JSON.getSubtype(), Charset.forName("utf8"));
 
-    private MockMvc mockMvc;
+  private MockMvc mockMvc;
 
-    @SuppressWarnings("rawtypes")
-    private HttpMessageConverter mappingJackson2HttpMessageConverter;
-
-
-    private Account acc;
-
-    private Account acc2;
-    @Autowired
-    private AccountRepository accountRepository;
-
-    private int monthsGoBack = 6;
-    private int expensesForMonth = 3;
+  @SuppressWarnings("rawtypes")
+  private HttpMessageConverter mappingJackson2HttpMessageConverter;
 
 
-    private KeycloakAuthenticationToken mockPrincipal;
+  private Account acc;
+
+  private Account acc2;
+  @Autowired
+  private AccountRepository accountRepository;
+
+  private int monthsGoBack = 6;
+  private int expensesForMonth = 3;
 
 
-    // @Autowired
-    // private ExpenseController controller;
-
-    @Autowired
-    private WebApplicationContext webApplicationContext;
-
-    @Autowired
-    void setConverters(HttpMessageConverter<?>[] converters) {
-
-        this.mappingJackson2HttpMessageConverter = Arrays.asList(converters).stream()
-                .filter(hmc -> hmc instanceof MappingJackson2HttpMessageConverter).findAny().orElse(null);
-
-        assertNotNull("the JSON message converter must not be null", this.mappingJackson2HttpMessageConverter);
-    }
-
-    @Before
-    @Transactional
-    public void setup() throws Exception {
+  private KeycloakAuthenticationToken mockPrincipal;
 
 
-        accountRepository.deleteAll();
+  // @Autowired
+  // private ExpenseController controller;
 
-        // auth stuff
-        mockPrincipal = Mockito.mock(KeycloakAuthenticationToken.class);
-        Mockito.when(mockPrincipal.getName()).thenReturn("test");
+  @Autowired
+  private WebApplicationContext webApplicationContext;
 
-        KeycloakPrincipal keyPrincipal = Mockito.mock(KeycloakPrincipal.class);
-        RefreshableKeycloakSecurityContext ctx = Mockito.mock(RefreshableKeycloakSecurityContext.class);
+  @Autowired
+  void setConverters(HttpMessageConverter<?>[] converters) {
 
-        AccessToken token = Mockito.mock(AccessToken.class);
-        Mockito.when(token.getSubject()).thenReturn("1L");
-        Mockito.when(ctx.getToken()).thenReturn(token);
-        Mockito.when(keyPrincipal.getKeycloakSecurityContext()).thenReturn(ctx);
-        Mockito.when(mockPrincipal.getPrincipal()).thenReturn(keyPrincipal);
+    this.mappingJackson2HttpMessageConverter = Arrays.asList(converters).stream()
+        .filter(hmc -> hmc instanceof MappingJackson2HttpMessageConverter).findAny().orElse(null);
 
-        this.mockMvc = webAppContextSetup(webApplicationContext).build();
+    assertNotNull("the JSON message converter must not be null", this.mappingJackson2HttpMessageConverter);
+  }
 
-
-        acc = TestUtils.getAccount();
-
-
-        accountRepository.save(acc);
-        acc.setUserId("1L");
+  @Before
+  @Transactional
+  public void setup() throws Exception {
 
 
-        acc2 = TestUtils.getAccount();
+    accountRepository.deleteAll();
 
-        accountRepository.save(acc2);
-        acc2.setUserId("1L");
+    // auth stuff
+    mockPrincipal = Mockito.mock(KeycloakAuthenticationToken.class);
+    Mockito.when(mockPrincipal.getName()).thenReturn("test");
 
-    }
+    KeycloakPrincipal keyPrincipal = Mockito.mock(KeycloakPrincipal.class);
+    RefreshableKeycloakSecurityContext ctx = Mockito.mock(RefreshableKeycloakSecurityContext.class);
 
+    AccessToken token = Mockito.mock(AccessToken.class);
+    Mockito.when(token.getSubject()).thenReturn("1L");
+    Mockito.when(ctx.getToken()).thenReturn(token);
+    Mockito.when(keyPrincipal.getKeycloakSecurityContext()).thenReturn(ctx);
+    Mockito.when(mockPrincipal.getPrincipal()).thenReturn(keyPrincipal);
 
-
-    @Test
-    @Transactional
-    public void readNonExistingOverview() throws Exception {
-
-        // given(controller.principal).willReturn(allEmployees);
-        mockMvc.perform(get("/account/overview/" + 98).principal(mockPrincipal)).andExpect(status().isNotFound());
-    }
-
-
-    @SuppressWarnings("unchecked")
-    protected String json(Object o) throws IOException {
-        MockHttpOutputMessage mockHttpOutputMessage = new MockHttpOutputMessage();
-        this.mappingJackson2HttpMessageConverter.write(o, MediaType.APPLICATION_JSON, mockHttpOutputMessage);
-        return mockHttpOutputMessage.getBodyAsString();
-    }
+    this.mockMvc = webAppContextSetup(webApplicationContext).build();
 
 
-    @Test
-    @Transactional
-    public void testGetAccountList() throws Exception {
+    acc = TestUtils.getAccount();
 
 
-        // given(controller.principal).willReturn(allEmployees);
-        mockMvc.perform(get("/account/list").principal(mockPrincipal)).andExpect(status().isOk())
-                .andDo(MockMvcResultHandlers.print()).andExpect(content().contentType(contentType))
-                .andExpect(jsonPath("$.[0].id", is(acc.getId().intValue())))
-                .andExpect(jsonPath("$.[0].active", is(acc.isActive())))
-                .andExpect(jsonPath("$.[0].bank", is(acc.getBank())))
-                .andExpect(jsonPath("$.[0].name", is(acc.getName())))
-                .andExpect(jsonPath("$.[0].userId", is("1L")))
-                .andExpect(jsonPath("$.[1].id", is(acc2.getId().intValue())))
-                .andExpect(jsonPath("$.[1].active", is(acc2.isActive())))
-                .andExpect(jsonPath("$.[1].bank", is(acc2.getBank())))
-                .andExpect(jsonPath("$.[1].name", is(acc2.getName())))
-                .andExpect(jsonPath("$.[1].userId", is("1L")));
+    accountRepository.save(acc);
+    acc.setUserId("1L");
 
 
-    }
+    acc2 = TestUtils.getAccount();
 
-    @Test
-    @Transactional
-    public void testGetAccountListIds() throws Exception {
+    accountRepository.save(acc2);
+    acc2.setUserId("1L");
 
-
-        // given(controller.principal).willReturn(allEmployees);
-        mockMvc.perform(get("/account/list/id").principal(mockPrincipal)).andExpect(status().isOk())
-                .andDo(MockMvcResultHandlers.print()).andExpect(content().contentType(contentType))
-                .andExpect(jsonPath("$", hasSize(greaterThan(0))));
+  }
 
 
-    }
+  @Test
+  @Transactional
+  public void readNonExistingOverview() throws Exception {
 
+    // given(controller.principal).willReturn(allEmployees);
+    mockMvc.perform(get("/account/overview/" + 98).principal(mockPrincipal)).andExpect(status().isNotFound());
+  }
+
+
+  @SuppressWarnings("unchecked")
+  protected String json(Object o) throws IOException {
+    MockHttpOutputMessage mockHttpOutputMessage = new MockHttpOutputMessage();
+    this.mappingJackson2HttpMessageConverter.write(o, MediaType.APPLICATION_JSON, mockHttpOutputMessage);
+    return mockHttpOutputMessage.getBodyAsString();
+  }
+
+
+  @Test
+  @Transactional
+  public void testGetAccountList() throws Exception {
+
+
+    // given(controller.principal).willReturn(allEmployees);
+    mockMvc.perform(get("/account/list").principal(mockPrincipal)).andExpect(status().isOk())
+        .andDo(MockMvcResultHandlers.print()).andExpect(content().contentType(contentType))
+        .andExpect(jsonPath("$.[0].id", is(acc.getId().intValue())))
+        .andExpect(jsonPath("$.[0].active", is(acc.isActive())))
+        .andExpect(jsonPath("$.[0].bank", is(acc.getBank())))
+        .andExpect(jsonPath("$.[0].name", is(acc.getName())))
+        .andExpect(jsonPath("$.[0].userId", is("1L")))
+        .andExpect(jsonPath("$.[1].id", is(acc2.getId().intValue())))
+        .andExpect(jsonPath("$.[1].active", is(acc2.isActive())))
+        .andExpect(jsonPath("$.[1].bank", is(acc2.getBank())))
+        .andExpect(jsonPath("$.[1].name", is(acc2.getName())))
+        .andExpect(jsonPath("$.[1].userId", is("1L")));
+
+
+  }
+
+  @Test
+  @Transactional
+  public void testGetAccountListIds() throws Exception {
+
+
+    // given(controller.principal).willReturn(allEmployees);
+    mockMvc.perform(get("/account/list/id").principal(mockPrincipal)).andExpect(status().isOk())
+        .andDo(MockMvcResultHandlers.print()).andExpect(content().contentType(contentType))
+        .andExpect(jsonPath("$", hasSize(greaterThan(0))));
+
+
+  }
 
 
 }

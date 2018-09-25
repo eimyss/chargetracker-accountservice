@@ -13,34 +13,36 @@ import java.security.Principal;
 public class SecurityService {
 
 
-    private final org.slf4j.Logger logger = LoggerFactory.getLogger(this.getClass());
+  private final org.slf4j.Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    public boolean isAllowedToReadAcc(Principal authentication, long accID) {
+  public boolean isAllowedToReadAcc(Principal authentication, long accID) {
 
-        if (authentication == null)
-            throw new SecurityException("Authentication is null");
-
-
-        logger.debug("checking access for account from user: " + authentication.getName());
-
-        // for now is okay
-        return true;
-
+    if (authentication == null) {
+      throw new SecurityException("Authentication is null");
     }
 
-    public long getOrCreateUserFromPrincipal(KeycloakAuthenticationToken authentication) {
-        return 0L;
 
+    logger.debug("checking access for account from user: " + authentication.getName());
+
+    // for now is okay
+    return true;
+
+  }
+
+  public long getOrCreateUserFromPrincipal(KeycloakAuthenticationToken authentication) {
+    return 0L;
+
+  }
+
+  public String getUserIdFromPrincipal(KeycloakAuthenticationToken keycloakAuthenticationToken) {
+
+    if (keycloakAuthenticationToken == null) {
+      throw new SecurityException("Principal cannot be null");
     }
 
-    public String getUserIdFromPrincipal(KeycloakAuthenticationToken keycloakAuthenticationToken) {
+    KeycloakPrincipal principal = (KeycloakPrincipal) keycloakAuthenticationToken.getPrincipal();
+    RefreshableKeycloakSecurityContext ctx = (RefreshableKeycloakSecurityContext) principal.getKeycloakSecurityContext();
+    return ctx.getToken().getSubject();
 
-        if (keycloakAuthenticationToken == null)
-            throw new SecurityException("Principal cannot be null");
-
-        KeycloakPrincipal principal = (KeycloakPrincipal) keycloakAuthenticationToken.getPrincipal();
-        RefreshableKeycloakSecurityContext ctx = (RefreshableKeycloakSecurityContext) principal.getKeycloakSecurityContext();
-        return ctx.getToken().getSubject();
-
-    }
+  }
 }

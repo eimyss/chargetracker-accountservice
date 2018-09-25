@@ -41,124 +41,123 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 @Transactional
 public class AccountServiceTest {
 
-    private MediaType contentType = new MediaType(MediaType.APPLICATION_JSON.getType(),
-            MediaType.APPLICATION_JSON.getSubtype(), Charset.forName("utf8"));
+  private MediaType contentType = new MediaType(MediaType.APPLICATION_JSON.getType(),
+      MediaType.APPLICATION_JSON.getSubtype(), Charset.forName("utf8"));
 
-    private MockMvc mockMvc;
+  private MockMvc mockMvc;
 
-    @Inject
-    private AccountService accountService;
+  @Inject
+  private AccountService accountService;
 
-    @Autowired
-    private WebApplicationContext webApplicationContext;
+  @Autowired
+  private WebApplicationContext webApplicationContext;
 
-    @Autowired
-    private AccountRepository accountRepository;
+  @Autowired
+  private AccountRepository accountRepository;
 
-    private int monthsGoBack = 6;
-    private int expensesForMonth = 3;
+  private int monthsGoBack = 6;
+  private int expensesForMonth = 3;
 
-    private Account acc = null;
-
-
-    private Account acc2;
+  private Account acc = null;
 
 
-    private final org.slf4j.Logger logger = LoggerFactory.getLogger(this.getClass());
-    private KeycloakAuthenticationToken mockPrincipal;
-
-    @Before
-    public void setup() throws Exception {
-
-        accountRepository.deleteAll();
-
-        // auth stuff
-        mockPrincipal = Mockito.mock(KeycloakAuthenticationToken.class);
-        Mockito.when(mockPrincipal.getName()).thenReturn("test");
-
-        KeycloakPrincipal keyPrincipal = Mockito.mock(KeycloakPrincipal.class);
-        RefreshableKeycloakSecurityContext ctx = Mockito.mock(RefreshableKeycloakSecurityContext.class);
-
-        AccessToken token = Mockito.mock(AccessToken.class);
-        Mockito.when(token.getSubject()).thenReturn("Subject-111");
-        Mockito.when(ctx.getToken()).thenReturn(token);
-        Mockito.when(keyPrincipal.getKeycloakSecurityContext()).thenReturn(ctx);
-        Mockito.when(mockPrincipal.getPrincipal()).thenReturn(keyPrincipal);
+  private Account acc2;
 
 
+  private final org.slf4j.Logger logger = LoggerFactory.getLogger(this.getClass());
+  private KeycloakAuthenticationToken mockPrincipal;
 
-        this.mockMvc = webAppContextSetup(webApplicationContext).build();
+  @Before
+  public void setup() throws Exception {
 
-        acc = TestUtils.getAccount();
+    accountRepository.deleteAll();
+
+    // auth stuff
+    mockPrincipal = Mockito.mock(KeycloakAuthenticationToken.class);
+    Mockito.when(mockPrincipal.getName()).thenReturn("test");
+
+    KeycloakPrincipal keyPrincipal = Mockito.mock(KeycloakPrincipal.class);
+    RefreshableKeycloakSecurityContext ctx = Mockito.mock(RefreshableKeycloakSecurityContext.class);
+
+    AccessToken token = Mockito.mock(AccessToken.class);
+    Mockito.when(token.getSubject()).thenReturn("Subject-111");
+    Mockito.when(ctx.getToken()).thenReturn(token);
+    Mockito.when(keyPrincipal.getKeycloakSecurityContext()).thenReturn(ctx);
+    Mockito.when(mockPrincipal.getPrincipal()).thenReturn(keyPrincipal);
 
 
-        accountRepository.save(acc);
-        acc.setUserId("1L");
+    this.mockMvc = webAppContextSetup(webApplicationContext).build();
 
-        acc2 = TestUtils.getAccount();
-
-
-        accountRepository.save(acc2);
-        acc2.setUserId("1L");
+    acc = TestUtils.getAccount();
 
 
+    accountRepository.save(acc);
+    acc.setUserId("1L");
+
+    acc2 = TestUtils.getAccount();
+
+
+    accountRepository.save(acc2);
+    acc2.setUserId("1L");
+
+
+  }
+
+
+  @Test
+  public void getTotalAccounts() throws Exception {
+
+    Stream<Account> accounts = accountService.getAccountsByUserId("1L");
+    assertThat(accounts).isNotNull();
+    assertThat(((Stream) accounts).count()).isEqualTo(2);
+
+  }
+
+  @Test
+  public void getAQccountListIds() throws Exception {
+
+    List<Long> accounts = accountService.getAccountIds();
+    assertThat(accounts).isNotNull();
+    assertThat(accounts.size()).isEqualTo(2);
+
+  }
+
+  @Test
+  @Transactional
+  public void getExpensesByAccount() throws Exception {
+
+    Stream<Account> accounts = accountService.getAccountsByUserId("1L");
+    assertThat(accounts).isNotNull();
+    List<Account> accountList = accounts.collect(Collectors.toList());
+    assertThat(accountList.size()).isEqualTo(2);
+
+    for (Account acc : accountList) {
+      assertThat(acc.getCreateDate()).isNotNull();
+      assertThat(acc.getBank()).isNotNull();
     }
 
-
-    @Test
-    public void getTotalAccounts() throws Exception {
-
-        Stream<Account> accounts = accountService.getAccountsByUserId("1L");
-        assertThat(accounts).isNotNull();
-        assertThat(((Stream) accounts).count()).isEqualTo(2);
-
-    }
-
-    @Test
-    public void getAQccountListIds() throws Exception {
-
-        List<Long> accounts = accountService.getAccountIds();
-        assertThat(accounts).isNotNull();
-        assertThat(accounts.size()).isEqualTo(2);
-
-    }
-
-    @Test
-    @Transactional
-    public void getExpensesByAccount() throws Exception {
-
-        Stream<Account> accounts = accountService.getAccountsByUserId("1L");
-        assertThat(accounts).isNotNull();
-        List<Account> accountList = accounts.collect(Collectors.toList());
-        assertThat(accountList.size()).isEqualTo(2);
-
-        for (Account acc : accountList) {
-            assertThat(acc.getCreateDate()).isNotNull();
-            assertThat(acc.getBank()).isNotNull();
-        }
-
-    }
+  }
 
 
-    @Test
-    public void testEditAccount() throws Exception {
+  @Test
+  public void testEditAccount() throws Exception {
 
-        Optional<Account> accountOpt = accountService.getAccountById(acc.getId(), mockPrincipal);
-        assertThat(accountOpt.isPresent()).isTrue();
+    Optional<Account> accountOpt = accountService.getAccountById(acc.getId(), mockPrincipal);
+    assertThat(accountOpt.isPresent()).isTrue();
 
-        Account retrieved = accountOpt.get();
-        String name = retrieved.getName();
-        String neuName = "edited By Test";
+    Account retrieved = accountOpt.get();
+    String name = retrieved.getName();
+    String neuName = "edited By Test";
 
-        retrieved.setName(neuName);
-        accountService.saveAccount(retrieved, mockPrincipal);
+    retrieved.setName(neuName);
+    accountService.saveAccount(retrieved, mockPrincipal);
 
-        Optional<Account> accupdate = accountRepository.findById(acc.getId());
+    Optional<Account> accupdate = accountRepository.findById(acc.getId());
 
-        assertThat(accupdate.isPresent()).isTrue();
-        assertThat(accupdate.get().getName()).isEqualTo(neuName);
+    assertThat(accupdate.isPresent()).isTrue();
+    assertThat(accupdate.get().getName()).isEqualTo(neuName);
 
-    }
+  }
 
 
 }

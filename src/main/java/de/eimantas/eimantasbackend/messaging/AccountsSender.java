@@ -12,29 +12,29 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class AccountsSender {
-    private final RabbitTemplate rabbitTemplate;
+  private final RabbitTemplate rabbitTemplate;
 
-    private ObjectMapper mapper = new ObjectMapper();
+  private ObjectMapper mapper = new ObjectMapper();
 
-    private final Exchange exchange;
+  private final Exchange exchange;
 
-    private final org.slf4j.Logger logger = LoggerFactory.getLogger(this.getClass());
-
-
-    public AccountsSender(RabbitTemplate rabbitTemplate, Exchange exchange) {
-        this.rabbitTemplate = rabbitTemplate;
-        this.exchange = exchange;
-
-        JavaTimeModule module = new JavaTimeModule();
-        mapper.registerModule(module);
-    }
+  private final org.slf4j.Logger logger = LoggerFactory.getLogger(this.getClass());
 
 
-    public void createExpense(AccountDTO account) throws JsonProcessingException {
-        // ... do some database stuff
-        String routingKey = "expenses.created";
+  public AccountsSender(RabbitTemplate rabbitTemplate, Exchange exchange) {
+    this.rabbitTemplate = rabbitTemplate;
+    this.exchange = exchange;
 
-        logger.info("Sending to exchange: " + exchange.getName() + " with message: " + account);
-        rabbitTemplate.convertAndSend(exchange.getName(), routingKey, mapper.writeValueAsString(account));
-    }
+    JavaTimeModule module = new JavaTimeModule();
+    mapper.registerModule(module);
+  }
+
+
+  public void createExpense(AccountDTO account) throws JsonProcessingException {
+    // ... do some database stuff
+    String routingKey = "expenses.created";
+
+    logger.info("Sending to exchange: " + exchange.getName() + " with message: " + account);
+    rabbitTemplate.convertAndSend(exchange.getName(), routingKey, mapper.writeValueAsString(account));
+  }
 }

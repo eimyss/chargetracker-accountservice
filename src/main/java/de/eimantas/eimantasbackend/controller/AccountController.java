@@ -25,140 +25,143 @@ import java.util.Optional;
 @CrossOrigin(origins = "*")
 @RequestMapping(value = "/account")
 public class AccountController {
-    private final org.slf4j.Logger logger = LoggerFactory.getLogger(this.getClass());
+  private final org.slf4j.Logger logger = LoggerFactory.getLogger(this.getClass());
 
 
-    @Inject
-    private AccountService accountService;
+  @Inject
+  private AccountService accountService;
 
-    @Inject
-    private EntitiesConverter entitiesConverter;
+  @Inject
+  private EntitiesConverter entitiesConverter;
 
-    @Inject
-    private SecurityService securityService;
+  @Inject
+  private SecurityService securityService;
 
-    @Inject
-    private EntitiesConverter converter;
+  @Inject
+  private EntitiesConverter converter;
 
-    public AccountController() {
+  public AccountController() {
 
+  }
+
+
+  @GetMapping(value = "/get/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @CrossOrigin(origins = "*")
+  public AccountDTO getAccountById(Principal principal, @PathVariable long id) throws NonExistingEntityException {
+
+    KeycloakAuthenticationToken user = (KeycloakAuthenticationToken) principal;
+
+    Optional<Account> acc = accountService.getAccountById(id, user);
+
+    if (!acc.isPresent()) {
+      throw new NonExistingEntityException("Account for id '" + id + "' cannot be found!");
     }
 
+    return entitiesConverter.getAccountDTO(acc.get());
 
-    @GetMapping(value = "/get/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @CrossOrigin(origins = "*")
-    public AccountDTO getAccountById(Principal principal, @PathVariable long id) throws NonExistingEntityException {
+  }
 
-        KeycloakAuthenticationToken user = (KeycloakAuthenticationToken) principal;
+  @GetMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
+  @CrossOrigin(origins = "*")
+  @Transactional
+  public ResponseEntity<List<AccountDTO>> getAccountsList(Principal principal) {
 
-        Optional<Account> acc = accountService.getAccountById(id, user);
 
-        if (!acc.isPresent())
-            throw new NonExistingEntityException("Account for id '" + id + "' cannot be found!");
-
-        return entitiesConverter.getAccountDTO(acc.get());
-
+    if (principal == null) {
+      return new ResponseEntity<List<AccountDTO>>(HttpStatus.FORBIDDEN);
     }
 
-    @GetMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
-    @CrossOrigin(origins = "*")
-    @Transactional
-    public ResponseEntity<List<AccountDTO>> getAccountsList(Principal principal) {
+    logger.info("Principal: " + principal.toString());
+    KeycloakAuthenticationToken user = (KeycloakAuthenticationToken) principal;
+    logger.info("name direclty:" + user.getName());
+
+    List<AccountDTO> dtos = accountService.getAccountDtoByUserId(securityService.getUserIdFromPrincipal(user));
+
+    logger.info("returning account list size: " + dtos.size());
+    return new ResponseEntity<List<AccountDTO>>(dtos, HttpStatus.OK);
+
+  }
+
+  @GetMapping(value = "/list/id", produces = MediaType.APPLICATION_JSON_VALUE)
+  @CrossOrigin(origins = "*")
+  @Transactional
+  public Collection<Long> getAccountsListIds(Principal principal) {
+
+    logger.info("Principal: " + principal.toString());
+    KeycloakAuthenticationToken user = (KeycloakAuthenticationToken) principal;
 
 
-        if (principal == null)
-            return new ResponseEntity<List<AccountDTO>>(HttpStatus.FORBIDDEN);
+    List<Long> dtos = accountService.getAccountIds();
 
-        logger.info("Principal: " + principal.toString());
-        KeycloakAuthenticationToken user = (KeycloakAuthenticationToken) principal;
-        logger.info("name direclty:" + user.getName());
+    logger.info("returning account list size: " + dtos.size());
+    return dtos;
 
-        List<AccountDTO> dtos = accountService.getAccountDtoByUserId(securityService.getUserIdFromPrincipal(user));
+  }
 
-        logger.info("returning account list size: " + dtos.size());
-        return new ResponseEntity<List<AccountDTO>>(dtos, HttpStatus.OK);
 
+  @PostMapping("/save")
+  @Transactional
+  @CrossOrigin(origins = "*")
+  public ResponseEntity<AccountDTO> saveAccount(Principal principal, @RequestBody AccountDTO account) throws NonExistingEntityException {
+
+    logger.info("creating account: " + account.toString());
+
+    if (principal == null) {
+      return new ResponseEntity(HttpStatus.FORBIDDEN);
     }
 
-    @GetMapping(value = "/list/id", produces = MediaType.APPLICATION_JSON_VALUE)
-    @CrossOrigin(origins = "*")
-    @Transactional
-    public Collection<Long> getAccountsListIds(Principal principal) {
-
-        logger.info("Principal: " + principal.toString());
-        KeycloakAuthenticationToken user = (KeycloakAuthenticationToken) principal;
-
-
-        List<Long> dtos = accountService.getAccountIds();
-
-        logger.info("returning account list size: " + dtos.size());
-        return dtos;
-
+    if (account == null) {
+      logger.info("passed account dto is null");
+      return new ResponseEntity(HttpStatus.BAD_REQUEST);
     }
 
-
-
-    @PostMapping("/save")
-    @Transactional
-    @CrossOrigin(origins = "*")
-    public ResponseEntity<AccountDTO> saveAccount(Principal principal, @RequestBody AccountDTO account) throws NonExistingEntityException {
-
-        logger.info("creating account: " + account.toString());
-
-        if (principal == null)
-            return new ResponseEntity(HttpStatus.FORBIDDEN);
-
-        if (account == null) {
-            logger.info("passed account dto is null");
-            return new ResponseEntity(HttpStatus.BAD_REQUEST);
-        }
-
-        if (account.getId() != null) {
-            logger.info("passed account is with ID, please use PUT");
-            return new ResponseEntity(HttpStatus.BAD_REQUEST);
-        }
-
-        KeycloakAuthenticationToken user = (KeycloakAuthenticationToken) principal;
-        Account acc = accountService.saveAccount(account, user);
-        logger.info("Account created: " + acc.toString());
-        return new ResponseEntity<AccountDTO>(converter.getAccountDTO(acc), HttpStatus.CREATED);
-
+    if (account.getId() != null) {
+      logger.info("passed account is with ID, please use PUT");
+      return new ResponseEntity(HttpStatus.BAD_REQUEST);
     }
 
-    @PutMapping("/save")
-    @Transactional
-    @CrossOrigin(origins = "*")
-    public ResponseEntity<AccountDTO> updateAccount(Principal principal, @RequestBody AccountDTO account) throws NonExistingEntityException {
+    KeycloakAuthenticationToken user = (KeycloakAuthenticationToken) principal;
+    Account acc = accountService.saveAccount(account, user);
+    logger.info("Account created: " + acc.toString());
+    return new ResponseEntity<AccountDTO>(converter.getAccountDTO(acc), HttpStatus.CREATED);
 
-        logger.info("updating account: " + account.toString());
+  }
 
-        if (principal == null)
-            return new ResponseEntity(HttpStatus.FORBIDDEN);
+  @PutMapping("/save")
+  @Transactional
+  @CrossOrigin(origins = "*")
+  public ResponseEntity<AccountDTO> updateAccount(Principal principal, @RequestBody AccountDTO account) throws NonExistingEntityException {
 
-        if (account == null) {
-            logger.info("passed account dto is null");
-            return new ResponseEntity(HttpStatus.BAD_REQUEST);
-        }
+    logger.info("updating account: " + account.toString());
 
-        if (account.getId() == null) {
-            logger.info("passed account ID is not null (please use post)");
-            return new ResponseEntity(HttpStatus.BAD_REQUEST);
-        }
-
-        KeycloakAuthenticationToken user = (KeycloakAuthenticationToken) principal;
-        Account acc = accountService.saveAccount(account, user);
-        logger.info("Account updated: " + acc.toString());
-        return new ResponseEntity<AccountDTO>(converter.getAccountDTO(acc), HttpStatus.OK);
-
+    if (principal == null) {
+      return new ResponseEntity(HttpStatus.FORBIDDEN);
     }
 
-
-    @ExceptionHandler(NonExistingEntityException.class)
-    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
-    public @ResponseBody
-    ErrorDesc handleException(NonExistingEntityException e) {
-        return new ErrorDesc(e.getMessage());
+    if (account == null) {
+      logger.info("passed account dto is null");
+      return new ResponseEntity(HttpStatus.BAD_REQUEST);
     }
+
+    if (account.getId() == null) {
+      logger.info("passed account ID is not null (please use post)");
+      return new ResponseEntity(HttpStatus.BAD_REQUEST);
+    }
+
+    KeycloakAuthenticationToken user = (KeycloakAuthenticationToken) principal;
+    Account acc = accountService.saveAccount(account, user);
+    logger.info("Account updated: " + acc.toString());
+    return new ResponseEntity<AccountDTO>(converter.getAccountDTO(acc), HttpStatus.OK);
+
+  }
+
+
+  @ExceptionHandler(NonExistingEntityException.class)
+  @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+  public @ResponseBody
+  ErrorDesc handleException(NonExistingEntityException e) {
+    return new ErrorDesc(e.getMessage());
+  }
 
 
 }
