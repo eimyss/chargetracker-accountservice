@@ -1,5 +1,7 @@
 package de.eimantas.eimantasbackend;
 
+import de.eimantas.eimantasbackend.entities.Account;
+import de.eimantas.eimantasbackend.service.AccountService;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
@@ -19,9 +21,26 @@ public class PostConstructBean implements ApplicationRunner {
 
 
   @Autowired
+  private AccountService service;
+
+  @Autowired
   private Environment environment;
 
   private void preFillData() {
+
+    logger.info("Filling data");
+
+    Account acc = new Account();
+    acc.setUserId("Keycloack-ID1-Filled");
+    acc.setName("prefilled");
+    acc.setActive(true);
+    acc.setBank("Sparda");
+    acc.setBusinessAccount(true);
+
+    Account created = service.saveAccount(acc);
+
+    logger.info("account saved: " + acc.toString());
+
 
   }
 

@@ -107,4 +107,11 @@ public class AccountService {
   public List<Long> getAccountIds() {
     return accountRepository.getAllIds();
   }
+
+  public Account saveAccount(Account acc) {
+    logger.info("saving account");
+    acc.setCreateDate(LocalDate.now());
+    return accountRepository.save(acc);
+
+  }
 }

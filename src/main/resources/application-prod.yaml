@@ -8,7 +8,7 @@ spring:
   application:
     name: account-service
   datasource:
-    url: jdbc:mysql://192.168.123.157:3306/accounts?useSSL=false
+    url: jdbc:mysql://192.168.123.157:3306/accountsdb?useSSL=false
     username: spring
     password: expenses
     driverClassName: com.mysql.jdbc.Driver
@@ -38,3 +38,5 @@ eureka:
     healthCheckUrlPath: /actuator/health
 logging:
   file: myapplication.log
+server:
+  port: 8380
