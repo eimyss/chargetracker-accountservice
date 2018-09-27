@@ -31,7 +31,7 @@ public class PostConstructBean implements ApplicationRunner {
     logger.info("Filling data");
 
     Account acc = new Account();
-    acc.setUserId("Keycloack-ID1-Filled");
+    acc.setUserId("ee9fb974-c2c2-45f8-b60e-c22d9f00273f");
     acc.setName("prefilled");
     acc.setActive(true);
     acc.setBank("Sparda");
