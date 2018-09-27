@@ -1,5 +1,6 @@
 package de.eimantas.eimantasbackend.controller;
 
+import de.eimantas.eimantasbackend.controller.exceptions.BadRequestException;
 import de.eimantas.eimantasbackend.controller.exceptions.ErrorDesc;
 import de.eimantas.eimantasbackend.controller.exceptions.NonExistingEntityException;
 import de.eimantas.eimantasbackend.entities.Account;
@@ -64,7 +65,10 @@ public class AccountController {
   @GetMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
   @CrossOrigin(origins = "*")
   @Transactional
-  public List<AccountDTO> getAccountsList(Principal principal) {
+  public List<AccountDTO> getAccountsList(Principal principal) throws BadRequestException {
+
+    if (principal == null)
+      throw new BadRequestException("Auth cannot be null");
 
     logger.info("Principal: " + principal.toString());
     KeycloakAuthenticationToken user = (KeycloakAuthenticationToken) principal;

@@ -146,7 +146,7 @@ public class AccountControllerTest {
     String bookmarkJson = json(dto);
 
     this.mockMvc.perform(post("/account/save").principal(mockPrincipal).contentType(contentType).content(bookmarkJson))
-        .andExpect(status().isCreated())
+        .andExpect(status().isOk())
         .andDo(MockMvcResultHandlers.print())
         .andExpect(jsonPath("$.id", is(greaterThan(0))))
         .andExpect(jsonPath("$.active", is(true)))
@@ -201,7 +201,7 @@ public class AccountControllerTest {
 
     this.mockMvc.perform(put("/account/save").principal(mockPrincipal).contentType(contentType).content(bookmarkJson))
         .andDo(MockMvcResultHandlers.print())
-        .andExpect(status().isBadRequest());
+        .andExpect(status().isOk());
 
   }
 
