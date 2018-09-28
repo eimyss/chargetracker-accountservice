@@ -212,7 +212,7 @@ public class AccountControllerTest {
   public void testCreateAccountDtoWithID() throws Exception {
 
     AccountDTO dto = TestUtils.getAccountDTO();
-    dto.setId(12L);
+    dto.setId(12123L);
     String bookmarkJson = json(dto);
 
     this.mockMvc.perform(post("/account/save").principal(mockPrincipal).contentType(contentType).content(bookmarkJson))

@@ -102,7 +102,7 @@ public class AccountController {
 
     logger.info("creating account: " + account.toString());
     KeycloakAuthenticationToken user = (KeycloakAuthenticationToken) principal;
-    Account acc = accountService.saveAccount(account, user);
+    Account acc = accountService.saveAccount(converter.getAccountDTO(account), user);
     logger.info("Account created: " + acc.toString());
     return converter.getAccountDTO(acc);
 
@@ -116,7 +116,7 @@ public class AccountController {
     logger.info("updating account: " + account.toString());
 
     KeycloakAuthenticationToken user = (KeycloakAuthenticationToken) principal;
-    Account acc = accountService.saveAccount(account, user);
+    Account acc = accountService.saveAccount(converter.getAccountDTO(account), user);
     logger.info("Account updated: " + acc.toString());
     return converter.getAccountDTO(acc);
 
