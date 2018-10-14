@@ -1,7 +1,9 @@
 package de.eimantas.eimantasbackend;
 
 import de.eimantas.eimantasbackend.entities.Account;
+import de.eimantas.eimantasbackend.entities.Project;
 import de.eimantas.eimantasbackend.service.AccountService;
+import de.eimantas.eimantasbackend.service.ProjectService;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
@@ -10,6 +12,8 @@ import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Arrays;
 
 import static org.springframework.transaction.annotation.Isolation.READ_UNCOMMITTED;
@@ -22,6 +26,9 @@ public class PostConstructBean implements ApplicationRunner {
 
   @Autowired
   private AccountService service;
+
+  @Autowired
+  private ProjectService projectService;
 
   @Autowired
   private Environment environment;
@@ -41,6 +48,16 @@ public class PostConstructBean implements ApplicationRunner {
 
     logger.info("account saved: " + acc.toString());
 
+
+    Project project = new Project();
+    project.setCreateDate(LocalDate.now());
+    project.setUserId("ee9fb974-c2c2-45f8-b60e-c22d9f00273f");
+    project.setActive(true);
+    project.setName("Generated");
+    project.setRefBankAccountId(1);
+    project.setRate(BigDecimal.valueOf(86));
+
+    logger.info("Saving Project: " + projectService.saveProject(project).toString());
 
   }
 
