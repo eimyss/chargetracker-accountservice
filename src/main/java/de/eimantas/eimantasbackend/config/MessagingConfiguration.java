@@ -1,6 +1,7 @@
 package de.eimantas.eimantasbackend.config;
 
 import de.eimantas.eimantasbackend.messaging.AccountsSender;
+import de.eimantas.eimantasbackend.messaging.ExpensesSender;
 import org.springframework.amqp.core.Exchange;
 import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -17,8 +18,13 @@ public class MessagingConfiguration {
   }
 
   @Bean
-  public AccountsSender expensesSender(RabbitTemplate rabbitTemplate, Exchange eventExchange) {
+  public AccountsSender accountsSender(RabbitTemplate rabbitTemplate, Exchange eventExchange) {
     return new AccountsSender(rabbitTemplate, eventExchange);
+  }
+
+  @Bean
+  public ExpensesSender expensesSender(RabbitTemplate rabbitTemplate, Exchange eventExchange) {
+    return new ExpensesSender(rabbitTemplate, eventExchange);
   }
 
 }

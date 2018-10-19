@@ -2,7 +2,9 @@ package de.eimantas.eimantasbackend.service;
 
 import de.eimantas.eimantasbackend.TestUtils;
 import de.eimantas.eimantasbackend.entities.Account;
+import de.eimantas.eimantasbackend.messaging.ExpensesSender;
 import de.eimantas.eimantasbackend.repo.AccountRepository;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -48,6 +50,9 @@ public class AccountServiceTest {
 
   @Inject
   private AccountService accountService;
+
+  @Inject
+  ExpensesSender expensesSender;
 
   @Autowired
   private WebApplicationContext webApplicationContext;
@@ -114,7 +119,18 @@ public class AccountServiceTest {
   }
 
   @Test
-  public void getAQccountListIds() throws Exception {
+  public void testNotifyAddedExpense() throws Exception {
+
+    JSONObject jsonNotify = new JSONObject();
+    jsonNotify.put("accountId", 1);
+    jsonNotify.put("transactionId", 1);
+    jsonNotify.put("refEntityId",10);
+    expensesSender.notifyAddedExpense(jsonNotify);
+
+  }
+
+  @Test
+  public void getAccountListIds() throws Exception {
 
     List<Long> accounts = accountService.getAccountIds();
     assertThat(accounts).isNotNull();

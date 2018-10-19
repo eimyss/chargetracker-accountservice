@@ -4,14 +4,20 @@ import de.eimantas.eimantasbackend.controller.exceptions.NonExistingEntityExcept
 import de.eimantas.eimantasbackend.entities.Account;
 import de.eimantas.eimantasbackend.entities.converter.EntitiesConverter;
 import de.eimantas.eimantasbackend.entities.dto.AccountDTO;
+import de.eimantas.eimantasbackend.messaging.ExpensesSender;
 import de.eimantas.eimantasbackend.repo.AccountRepository;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.inject.Inject;
+import java.math.BigDecimal;
 import java.security.Principal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -29,6 +35,9 @@ public class AccountService {
 
   @Inject
   EntitiesConverter converter;
+
+  @Inject
+  ExpensesSender expensesSender;
 
   private final org.slf4j.Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -113,5 +122,69 @@ public class AccountService {
     acc.setCreateDate(LocalDate.now());
     return accountRepository.save(acc);
 
+  }
+
+
+  @Transactional
+  public void processTransaction(JSONObject json) {
+
+    int accountId = parseInt(json, "accountId");
+    int entityId = parseInt(json, "refEntityId");
+    logger.info("processing transaction with id: " + accountId);
+
+    Optional<Account> acc = accountRepository.findById((long) accountId);
+    int transactionId = parseInt(json, "id");
+    if (acc.isPresent()) {
+      processAccountFromTransaction(acc.get(), json);
+      try {
+        JSONObject jsonNotify = new JSONObject();
+        jsonNotify.put("accountId", accountId);
+        jsonNotify.put("transactionId", transactionId);
+        jsonNotify.put("refEntityId",entityId);
+        expensesSender.notifyAddedExpense(jsonNotify);
+      } catch (JSONException e) {
+        logger.error("cannot create json for notification", e);
+        e.printStackTrace();
+      }
+
+    } else {
+      logger.error("Transaction with id : " + transactionId + " does not have acount with id: " + accountId);
+    }
+
+
+  }
+
+  private void processAccountFromTransaction(Account account, JSONObject json) {
+
+    account.increaseProcessedCount();
+    account.setLastProcessedTransaction(parseInt(json, "id"));
+    account.setLastProcessedTime(LocalDateTime.now());
+    BigDecimal processedAmount = parseBigDecimal(json, "amountAfter");
+    BigDecimal amount = parseBigDecimal(json, "amountBefore");
+    account.addAmount(amount);
+    account.addProcessedAmount(processedAmount);
+    accountRepository.save(account);
+
+  }
+
+  private BigDecimal parseBigDecimal(JSONObject json, String key) {
+    try {
+      return new BigDecimal(json.getString(key));
+    } catch (JSONException e) {
+      logger.info("error getting  int for key ", e);
+      e.printStackTrace();
+    }
+    return BigDecimal.ZERO;
+  }
+
+
+  private int parseInt(JSONObject json, String key) {
+    try {
+      return json.getInt(key);
+    } catch (JSONException e) {
+      logger.info("error getting  int for key ", e);
+      e.printStackTrace();
+    }
+    return 0;
   }
 }

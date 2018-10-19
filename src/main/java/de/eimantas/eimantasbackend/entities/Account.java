@@ -8,7 +8,9 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
@@ -25,9 +27,14 @@ public class Account {
   private LocalDate createDate;
   private LocalDate expireDate;
   private LocalDate updateDate;
+  private LocalDateTime lastProcessedTime;
+  private long lastProcessedTransaction;
   private boolean active;
+  private BigDecimal processedAmount;
+  private BigDecimal amount;
   private boolean businessAccount;
   private String bank;
+  private int processedCount;
   private @NonNull
   String name;
   private int expensesCount;
@@ -55,4 +62,21 @@ public class Account {
   }
 
 
+  public void increaseProcessedCount() {
+    processedCount++;
+  }
+
+  public void addAmount(BigDecimal amountToAdd) {
+    if (amount == null) {
+      amount = BigDecimal.ZERO;
+    }
+    amount = amount.add(amountToAdd);
+  }
+
+  public void addProcessedAmount(BigDecimal amountToAdd) {
+    if (processedAmount == null) {
+      processedAmount = BigDecimal.ZERO;
+    }
+    processedAmount = processedAmount.add(amountToAdd);
+  }
 }
