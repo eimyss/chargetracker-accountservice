@@ -9,6 +9,7 @@ import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.rabbit.listener.adapter.MessageListenerAdapter;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -16,14 +17,23 @@ import org.springframework.context.annotation.Configuration;
 public class ConsumerConfiguration {
 
 
+
+  @Value("${account.messaging.exchange}")
+  private String eventexchange;
+
+  @Value("${account.messaging.transactionServiceQueue}")
+  private String transactionServiceQueue;
+
+
+
   @Bean
   public TopicExchange eventExchange() {
-    return new TopicExchange("eventExchange");
+    return new TopicExchange(eventexchange);
   }
 
   @Bean
   public Queue bookingQueue() {
-    return new Queue("transactionServiceQueue");
+    return new Queue(transactionServiceQueue);
   }
 
 

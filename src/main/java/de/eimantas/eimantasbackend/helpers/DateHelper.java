@@ -13,7 +13,7 @@ public class DateHelper {
   public static LocalDateTime getEndOfWeek(int weekNumber) {
 
     LocalDateTime desiredDateNext = LocalDateTime.now()
-        .with(IsoFields.WEEK_OF_WEEK_BASED_YEAR, weekNumber + 1)
+        .with(IsoFields.WEEK_OF_WEEK_BASED_YEAR, weekNumber + 1L)
         .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
 
     return desiredDateNext.minusDays(1);

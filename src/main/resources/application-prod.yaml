@@ -1,3 +1,6 @@
+keycloak:
+  realm: expenses
+  resource: expenses-app
 spring:
   application:
     name: account-service
@@ -34,3 +37,7 @@ logging:
   file: myapplication.log
 server:
   port: 8380
+account:
+  messaging:
+    exchange: eventExchange
+    transactionServiceQueue: transactionServiceQueue

@@ -12,7 +12,6 @@ import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -67,8 +66,9 @@ public class AccountController {
   @Transactional
   public List<AccountDTO> getAccountsList(Principal principal) throws BadRequestException {
 
-    if (principal == null)
+    if (principal == null) {
       throw new BadRequestException("Auth cannot be null");
+    }
 
     logger.info("Principal: " + principal.toString());
     KeycloakAuthenticationToken user = (KeycloakAuthenticationToken) principal;
