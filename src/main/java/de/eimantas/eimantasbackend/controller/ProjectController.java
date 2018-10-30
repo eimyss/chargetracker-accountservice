@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.inject.Inject;
 import java.security.Principal;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -46,14 +47,25 @@ public class ProjectController {
   @CrossOrigin(origins = "*")
   public ProjectDTO getProject(Principal principal, @PathVariable long id) throws NonExistingEntityException {
 
-    KeycloakAuthenticationToken user = (KeycloakAuthenticationToken) principal;
-    Optional<Project> project = projectService.getProjectById(id);
+    Optional<Project> project = projectService.getProjectById(id, (KeycloakAuthenticationToken) principal);
     logger.info("Getting project with id: " + id);
 
     if (!project.isPresent()) {
       throw new NonExistingEntityException("Project for id '" + id + "' cannot be found!");
     }
     return entitiesConverter.getProjectDTO(project.get());
+
+  }
+
+  @GetMapping(value = "/get/all}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @CrossOrigin(origins = "*")
+  public List<ProjectDTO> getProject(Principal principal) {
+
+    KeycloakAuthenticationToken user = (KeycloakAuthenticationToken) principal;
+    List project = projectService.findAll(user);
+    logger.info("Getting all projects with size : " + project.size());
+
+    return entitiesConverter.getProjectDTO(project);
 
   }
 

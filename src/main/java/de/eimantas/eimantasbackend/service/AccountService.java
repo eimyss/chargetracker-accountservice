@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.inject.Inject;
 import java.math.BigDecimal;
-import java.security.Principal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -42,24 +41,8 @@ public class AccountService {
   private final org.slf4j.Logger logger = LoggerFactory.getLogger(this.getClass());
 
 
-  public Optional<Account> getAccountById(long accountId, Principal authentication) {
-    return accountRepository.findById(accountId);
-  }
-
-
-  public Account saveAccount(AccountDTO dto, KeycloakAuthenticationToken authentication) throws NonExistingEntityException {
-
-    if (dto == null) {
-      throw new IllegalArgumentException("Account passed is null");
-    }
-
-    if (authentication == null) {
-      throw new SecurityException("account cannot be null");
-    }
-
-    Account acc = converter.getAccountDTO(dto);
-    return saveAccount(acc, authentication);
-
+  public Optional<Account> getAccountById(long accountId, KeycloakAuthenticationToken authentication) {
+    return accountRepository.findByIdAndUserId(accountId, securityService.getUserIdFromPrincipal(authentication));
   }
 
 
@@ -97,31 +80,23 @@ public class AccountService {
   }
 
 
-  public Stream<Account> getAccountsByUserId(String userid) {
-    // TODO check auth
-    return accountRepository.findByUserId(userid);
+  public Stream<Account> getAccountsByUserId(KeycloakAuthenticationToken authentication) {
+    return accountRepository.findByUserId(securityService.getUserIdFromPrincipal(authentication));
   }
 
-  public List<AccountDTO> getAccountDtoByUserId(String userId) {
+  public List<AccountDTO> getAccountDtoByUserId(KeycloakAuthenticationToken authentication) {
 
-    Stream<Account> accountStream = getAccountsByUserId(userId);
+    Stream<Account> accountStream = getAccountsByUserId(authentication);
     return accountStream.map(acc -> converter.getAccountDTO(acc)).collect(Collectors.toList());
   }
 
 
-  public boolean isPresentAccount(Long accountId) {
+  private boolean isPresentAccount(Long accountId) {
     return accountRepository.existsById(accountId);
   }
 
-  public List<Long> getAccountIds() {
-    return accountRepository.getAllIds();
-  }
-
-  public Account saveAccount(Account acc) {
-    logger.info("saving account");
-    acc.setCreateDate(LocalDate.now());
-    return accountRepository.save(acc);
-
+  public List<Long> getAccountIds(KeycloakAuthenticationToken authentication) {
+    return accountRepository.getAllIds(securityService.getUserIdFromPrincipal(authentication));
   }
 
 
@@ -140,7 +115,7 @@ public class AccountService {
         JSONObject jsonNotify = new JSONObject();
         jsonNotify.put("accountId", accountId);
         jsonNotify.put("transactionId", transactionId);
-        jsonNotify.put("refEntityId",entityId);
+        jsonNotify.put("refEntityId", entityId);
         expensesSender.notifyAddedExpense(jsonNotify);
       } catch (JSONException e) {
         logger.error("cannot create json for notification", e);

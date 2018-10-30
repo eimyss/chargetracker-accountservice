@@ -86,25 +86,17 @@ public class AccountServiceTest {
     RefreshableKeycloakSecurityContext ctx = Mockito.mock(RefreshableKeycloakSecurityContext.class);
 
     AccessToken token = Mockito.mock(AccessToken.class);
-    Mockito.when(token.getSubject()).thenReturn("Subject-111");
+    Mockito.when(token.getSubject()).thenReturn(TestUtils.USER_ID);
     Mockito.when(ctx.getToken()).thenReturn(token);
     Mockito.when(keyPrincipal.getKeycloakSecurityContext()).thenReturn(ctx);
     Mockito.when(mockPrincipal.getPrincipal()).thenReturn(keyPrincipal);
 
 
     this.mockMvc = webAppContextSetup(webApplicationContext).build();
-
     acc = TestUtils.getAccount();
-
-
     accountRepository.save(acc);
-    acc.setUserId("1L");
-
     acc2 = TestUtils.getAccount();
-
-
     accountRepository.save(acc2);
-    acc2.setUserId("1L");
 
 
   }
@@ -113,7 +105,7 @@ public class AccountServiceTest {
   @Test
   public void getTotalAccounts() throws Exception {
 
-    Stream<Account> accounts = accountService.getAccountsByUserId("1L");
+    Stream<Account> accounts = accountService.getAccountsByUserId(mockPrincipal);
     assertThat(accounts).isNotNull();
     assertThat(((Stream) accounts).count()).isEqualTo(2);
 
@@ -134,7 +126,7 @@ public class AccountServiceTest {
   @Test
   public void getAccountListIds() throws Exception {
 
-    List<Long> accounts = accountService.getAccountIds();
+    List<Long> accounts = accountService.getAccountIds(mockPrincipal);
     assertThat(accounts).isNotNull();
     assertThat(accounts.size()).isEqualTo(2);
 
@@ -144,7 +136,7 @@ public class AccountServiceTest {
   @Transactional
   public void getExpensesByAccount() throws Exception {
 
-    Stream<Account> accounts = accountService.getAccountsByUserId("1L");
+    Stream<Account> accounts = accountService.getAccountsByUserId(mockPrincipal);
     assertThat(accounts).isNotNull();
     List<Account> accountList = accounts.collect(Collectors.toList());
     assertThat(accountList.size()).isEqualTo(2);

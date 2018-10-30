@@ -8,7 +8,9 @@ import org.modelmapper.ModelMapper;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 public class EntitiesConverter {
@@ -56,5 +58,9 @@ public class EntitiesConverter {
     Project postDto = modelMapper.map(project, Project.class);
     return postDto;
 
+  }
+
+  public List<ProjectDTO> getProjectDTO(List project) {
+    return (List<ProjectDTO>) project.stream().map(p -> modelMapper.map(p, ProjectDTO.class)).collect(Collectors.toList());
   }
 }

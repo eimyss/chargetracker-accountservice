@@ -70,11 +70,7 @@ public class AccountController {
       throw new BadRequestException("Auth cannot be null");
     }
 
-    logger.info("Principal: " + principal.toString());
-    KeycloakAuthenticationToken user = (KeycloakAuthenticationToken) principal;
-    logger.info("name direclty:" + user.getName());
-
-    List<AccountDTO> dtos = accountService.getAccountDtoByUserId(securityService.getUserIdFromPrincipal(user));
+    List<AccountDTO> dtos = accountService.getAccountDtoByUserId((KeycloakAuthenticationToken) principal);
 
     logger.info("returning account list size: " + dtos.size());
     return dtos;
@@ -86,9 +82,7 @@ public class AccountController {
   @Transactional
   public Collection<Long> getAccountsListIds(Principal principal) {
 
-
-    List<Long> dtos = accountService.getAccountIds();
-
+    List<Long> dtos = accountService.getAccountIds((KeycloakAuthenticationToken) principal);
     logger.info("returning account list size: " + dtos.size());
     return dtos;
 
