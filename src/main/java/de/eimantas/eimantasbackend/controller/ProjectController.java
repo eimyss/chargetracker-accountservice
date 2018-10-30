@@ -38,10 +38,6 @@ public class ProjectController {
   @Inject
   private EntitiesConverter converter;
 
-  public ProjectController() {
-
-  }
-
 
   @GetMapping(value = "/get/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   @CrossOrigin(origins = "*")
@@ -53,18 +49,18 @@ public class ProjectController {
     if (!project.isPresent()) {
       throw new NonExistingEntityException("Project for id '" + id + "' cannot be found!");
     }
+
+    logger.debug("got: " + project.toString());
     return entitiesConverter.getProjectDTO(project.get());
 
   }
 
-  @GetMapping(value = "/get/all}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/get/all", produces = MediaType.APPLICATION_JSON_VALUE)
   @CrossOrigin(origins = "*")
   public List<ProjectDTO> getProject(Principal principal) {
-
-    KeycloakAuthenticationToken user = (KeycloakAuthenticationToken) principal;
-    List project = projectService.findAll(user);
+    logger.info("getting all projects request");
+    List project = projectService.findAll((KeycloakAuthenticationToken) principal);
     logger.info("Getting all projects with size : " + project.size());
-
     return entitiesConverter.getProjectDTO(project);
 
   }

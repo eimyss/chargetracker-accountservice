@@ -39,7 +39,6 @@ public class ProjectService {
   }
 
   public List<Project> findAll(KeycloakAuthenticationToken token) {
-
     String user = securityService.getUserIdFromPrincipal(token);
     logger.info("getting all projects by user id: " + user);
     return projectRepository.findAllByUserId(user);
