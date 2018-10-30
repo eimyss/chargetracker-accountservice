@@ -45,4 +45,8 @@ public class ProjectService {
     return projectRepository.findAllByUserId(user);
 
   }
+
+  public Project saveProjectInTest(Project project) {
+    return projectRepository.save(project);
+  }
 }

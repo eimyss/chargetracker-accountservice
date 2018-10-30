@@ -162,4 +162,11 @@ public class AccountService {
     }
     return 0;
   }
+
+
+
+  // TODO after initial release it should be made more nice
+  public Account saveAccountInTest(Account acc) {
+    return accountRepository.save(acc);
+  }
 }

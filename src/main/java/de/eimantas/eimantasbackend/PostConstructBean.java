@@ -2,6 +2,7 @@ package de.eimantas.eimantasbackend;
 
 import de.eimantas.eimantasbackend.entities.Account;
 import de.eimantas.eimantasbackend.entities.Project;
+import de.eimantas.eimantasbackend.helpers.PopulateStuff;
 import de.eimantas.eimantasbackend.service.AccountService;
 import de.eimantas.eimantasbackend.service.ProjectService;
 import org.slf4j.LoggerFactory;
@@ -38,26 +39,26 @@ public class PostConstructBean implements ApplicationRunner {
     logger.info("Filling data");
 
     Account acc = new Account();
-    acc.setUserId("ee9fb974-c2c2-45f8-b60e-c22d9f00273f");
+    acc.setUserId(PopulateStuff.TEST_USER_ID);
     acc.setName("prefilled");
     acc.setActive(true);
     acc.setBank("Sparda");
     acc.setBusinessAccount(true);
 
-    Account created = service.saveAccount(acc);
+    Account created = service.saveAccountInTest(acc);
 
     logger.info("account saved: " + acc.toString());
 
 
     Project project = new Project();
     project.setCreateDate(LocalDate.now());
-    project.setUserId("ee9fb974-c2c2-45f8-b60e-c22d9f00273f");
+    project.setUserId(PopulateStuff.TEST_USER_ID);
     project.setActive(true);
     project.setName("Generated");
     project.setRefBankAccountId(1);
     project.setRate(BigDecimal.valueOf(86));
 
-    logger.info("Saving Project: " + projectService.saveProject(project).toString());
+    logger.info("Saving Project: " + projectService.saveProjectInTest(project).toString());
 
   }
 
