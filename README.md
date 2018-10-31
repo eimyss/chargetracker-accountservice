@@ -7,7 +7,8 @@ Basically it is a glorified CRUD with some messaging.
 
 This service is a part of ${insert.name.here} conglomerate. 
 There are currently 5 Services (account - this, expenses, processing, gateway, frontend).  
-In Addition it is backed by ELK, MariaDB, RabbitMQ.
+In Addition it is backed by ELK, MariaDB, RabbitMQ and Keycloak. 
+It is monitored by Prometheus (not public Yet).
 
 Trello cards: https://trello.com/b/qmE6t9eQ/expenses-microservice  
 
