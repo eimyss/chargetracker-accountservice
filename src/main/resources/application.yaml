@@ -27,4 +27,4 @@ management:
 account:
   messaging:
     exchange: eventExchange
-    transactionServiceQueue: transactionServiceQueue-ref
+    transactionServiceQueue: transactionProcessedServiceQueue-ref

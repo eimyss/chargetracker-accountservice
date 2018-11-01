@@ -40,4 +40,4 @@ server:
 account:
   messaging:
     exchange: eventExchange
-    transactionServiceQueue: transactionServiceQueue
+    transactionServiceQueue: transactionProcessedServiceQueue
