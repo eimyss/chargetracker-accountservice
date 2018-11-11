@@ -21,13 +21,15 @@ public class TransactionReceiver {
   public TransactionReceiver() {
   }
 
+
+
   //  @RabbitListener(queues = "orderServiceQueue")
   public void receive(String message) {
     logger.info("Received message '{}'", message);
   }
 
   public void handleMessage(Object message) throws IOException {
-    logger.info("transaction processed notification message '{}'", message);
+    logger.info("booking processed notification message '{}'", message);
 
     JSONObject json = null;
     try {
