@@ -4,6 +4,7 @@ import de.eimantas.eimantasbackend.controller.exceptions.BadRequestException;
 import de.eimantas.eimantasbackend.controller.exceptions.ErrorDesc;
 import de.eimantas.eimantasbackend.controller.exceptions.NonExistingEntityException;
 import de.eimantas.eimantasbackend.entities.Account;
+import de.eimantas.eimantasbackend.entities.AccountHistory;
 import de.eimantas.eimantasbackend.entities.converter.EntitiesConverter;
 import de.eimantas.eimantasbackend.entities.dto.AccountDTO;
 import de.eimantas.eimantasbackend.service.AccountService;
@@ -88,6 +89,24 @@ public class AccountController {
 
   }
 
+
+  @GetMapping(value = "/history/get/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @CrossOrigin(origins = "*")
+  public List<AccountHistory> getAccountHistory(Principal principal, @PathVariable long id) {
+    List<AccountHistory> list = accountService.getAccountHistoryByAccId(id, (KeycloakAuthenticationToken) principal);
+    logger.info("returning size history for acc " + id + " Size: " + list.size());
+    return list;
+  }
+
+
+  @GetMapping(value = "/history/list", produces = MediaType.APPLICATION_JSON_VALUE)
+  @CrossOrigin(origins = "*")
+  @Transactional
+  public List<AccountHistory> getAllAccountHistories(Principal principal) throws BadRequestException {
+    List<AccountHistory> dtos = accountService.getAllAccountsHistories((KeycloakAuthenticationToken) principal);
+    logger.info("returning account list full history size: " + dtos.size());
+    return dtos;
+  }
 
   @PostMapping("/save")
   @Transactional

@@ -2,9 +2,12 @@ package de.eimantas.eimantasbackend.service;
 
 import de.eimantas.eimantasbackend.controller.exceptions.NonExistingEntityException;
 import de.eimantas.eimantasbackend.entities.Account;
+import de.eimantas.eimantasbackend.entities.AccountHistory;
 import de.eimantas.eimantasbackend.entities.converter.EntitiesConverter;
 import de.eimantas.eimantasbackend.entities.dto.AccountDTO;
+import de.eimantas.eimantasbackend.helpers.EntityHelper;
 import de.eimantas.eimantasbackend.messaging.ExpensesSender;
+import de.eimantas.eimantasbackend.repo.AccountHistoryRepository;
 import de.eimantas.eimantasbackend.repo.AccountRepository;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -33,6 +36,9 @@ public class AccountService {
   AccountRepository accountRepository;
 
   @Inject
+  AccountHistoryRepository accountHistoryRepository;
+
+  @Inject
   EntitiesConverter converter;
 
   @Inject
@@ -43,6 +49,10 @@ public class AccountService {
 
   public Optional<Account> getAccountById(long accountId, KeycloakAuthenticationToken authentication) {
     return accountRepository.findByIdAndUserId(accountId, securityService.getUserIdFromPrincipal(authentication));
+  }
+
+  public List<AccountHistory> getAccountHistoryByAccId(long accountId, KeycloakAuthenticationToken authentication) {
+    return accountHistoryRepository.findByRefAccountIdAndUserId(accountId, securityService.getUserIdFromPrincipal(authentication));
   }
 
 
@@ -101,15 +111,28 @@ public class AccountService {
 
 
   @Transactional
-  public void processTransaction(JSONObject json) {
+  public void processTransaction(JSONObject json) throws JSONException {
 
-    int accountId = parseInt(json, "accountId");
-    int entityId = parseInt(json, "refEntityId");
+
+    int accountId = 0;
+    int entityId = 0;
+
+    try {
+      accountId = parseInt(json, "accountId");
+      entityId = parseInt(json, "refEntityId");
+    } catch (JSONException e) {
+      logger.error("Failed to parse Message for Account Service", e);
+      throw new JSONException("Failed to parse required params");
+    }
+
     logger.info("processing transaction with id: " + accountId);
+
+    AccountHistory accountHistory = EntityHelper.createHistory(accountId);
 
     Optional<Account> acc = accountRepository.findById((long) accountId);
     int transactionId = parseInt(json, "id");
     if (acc.isPresent()) {
+      accountHistory.createHistory(acc.get());
       processAccountFromTransaction(acc.get(), json);
       try {
         JSONObject jsonNotify = new JSONObject();
@@ -121,7 +144,7 @@ public class AccountService {
         logger.error("cannot create json for notification", e);
         e.printStackTrace();
       }
-
+      accountHistoryRepository.save(accountHistory);
     } else {
       logger.error("Transaction with id : " + transactionId + " does not have acount with id: " + accountId);
     }
@@ -129,7 +152,7 @@ public class AccountService {
 
   }
 
-  private void processAccountFromTransaction(Account account, JSONObject json) {
+  private void processAccountFromTransaction(Account account, JSONObject json) throws JSONException {
 
     account.increaseProcessedCount();
     account.setLastProcessedTransaction(parseInt(json, "id"));
@@ -142,31 +165,22 @@ public class AccountService {
 
   }
 
-  private BigDecimal parseBigDecimal(JSONObject json, String key) {
-    try {
-      return new BigDecimal(json.getString(key));
-    } catch (JSONException e) {
-      logger.info("error getting  int for key ", e);
-      e.printStackTrace();
-    }
-    return BigDecimal.ZERO;
+  private BigDecimal parseBigDecimal(JSONObject json, String key) throws JSONException {
+    return new BigDecimal(json.getString(key));
   }
 
 
-  private int parseInt(JSONObject json, String key) {
-    try {
-      return json.getInt(key);
-    } catch (JSONException e) {
-      logger.info("error getting  int for key ", e);
-      e.printStackTrace();
-    }
-    return 0;
+  private int parseInt(JSONObject json, String key) throws JSONException {
+    return json.getInt(key);
   }
-
 
 
   // TODO after initial release it should be made more nice
   public Account saveAccountInTest(Account acc) {
     return accountRepository.save(acc);
+  }
+
+  public List<AccountHistory> getAllAccountsHistories(KeycloakAuthenticationToken principal) {
+    return accountHistoryRepository.findByUserId(securityService.getUserIdFromPrincipal(principal));
   }
 }

@@ -32,3 +32,6 @@ log4j:
     org:
       hibernate:
         type: INFO
+logging:
+  level:
+    de.eimantas: DEBUG

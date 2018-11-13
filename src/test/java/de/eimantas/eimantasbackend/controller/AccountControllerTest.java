@@ -1,10 +1,12 @@
 package de.eimantas.eimantasbackend.controller;
 
 import de.eimantas.eimantasbackend.TestUtils;
-import de.eimantas.eimantasbackend.controller.exceptions.BadRequestException;
 import de.eimantas.eimantasbackend.entities.Account;
+import de.eimantas.eimantasbackend.entities.AccountHistory;
 import de.eimantas.eimantasbackend.entities.converter.EntitiesConverter;
 import de.eimantas.eimantasbackend.entities.dto.AccountDTO;
+import de.eimantas.eimantasbackend.helpers.EntityHelper;
+import de.eimantas.eimantasbackend.repo.AccountHistoryRepository;
 import de.eimantas.eimantasbackend.repo.AccountRepository;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -30,11 +32,13 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
+import javax.inject.Inject;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 
 import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -65,6 +69,9 @@ public class AccountControllerTest {
   @Autowired
   private AccountRepository accountRepository;
 
+  @Inject
+  private AccountHistoryRepository accountHistoryRepository;
+
 
   private KeycloakAuthenticationToken mockPrincipal;
 
@@ -88,22 +95,32 @@ public class AccountControllerTest {
 
     // auth stuff
     mockPrincipal = Mockito.mock(KeycloakAuthenticationToken.class);
-    Mockito.when(mockPrincipal.getName()).thenReturn("test");
+    Mockito.when(mockPrincipal.getName()).thenReturn(TestUtils.USER_ID);
 
     KeycloakPrincipal keyPrincipal = Mockito.mock(KeycloakPrincipal.class);
     RefreshableKeycloakSecurityContext ctx = Mockito.mock(RefreshableKeycloakSecurityContext.class);
 
     AccessToken token = Mockito.mock(AccessToken.class);
-    Mockito.when(token.getSubject()).thenReturn("Subject-111");
+    Mockito.when(token.getSubject()).thenReturn(TestUtils.USER_ID);
     Mockito.when(ctx.getToken()).thenReturn(token);
     Mockito.when(keyPrincipal.getKeycloakSecurityContext()).thenReturn(ctx);
     Mockito.when(mockPrincipal.getPrincipal()).thenReturn(keyPrincipal);
 
     this.mockMvc = webAppContextSetup(webApplicationContext).build();
     acc = TestUtils.getAccount();
-    acc.setUserId("Subject-111");
+    acc.setUserId(TestUtils.USER_ID);
 
     accountRepository.save(acc);
+
+    AccountHistory accountHistory = EntityHelper.createHistory(acc.getId());
+    accountHistory.setUserId(TestUtils.USER_ID);
+
+    AccountHistory accountHistory1 = EntityHelper.createHistory(123);
+    accountHistory1.setUserId(TestUtils.USER_ID);
+
+
+    accountHistoryRepository.save(accountHistory);
+    accountHistoryRepository.save(accountHistory1);
 
 
   }
@@ -142,6 +159,26 @@ public class AccountControllerTest {
 
 
   @Test
+  public void testGetAccountHistoryList() throws Exception {
+
+
+    // given(controller.principal).willReturn(allEmployees);
+    mockMvc.perform(get("/account/history/get/" + acc.getId()).principal(mockPrincipal)).andExpect(status().isOk())
+        .andDo(MockMvcResultHandlers.print()).andExpect(content().contentType(contentType))
+        .andExpect(jsonPath("$", hasSize(1)))
+        .andExpect(jsonPath("$.[0].refAccountId", is(acc.getId().intValue())));
+  }
+
+
+  @Test
+  public void testGetAccounHistoriestList() throws Exception {
+    // given(controller.principal).willReturn(allEmployees);
+    mockMvc.perform(get("/account/history/list").principal(mockPrincipal)).andExpect(status().isOk())
+        .andDo(MockMvcResultHandlers.print()).andExpect(content().contentType(contentType))
+        .andExpect(jsonPath("$", hasSize(2)));
+  }
+
+  @Test
   public void testCreateAccount() throws Exception {
 
     AccountDTO dto = TestUtils.getAccountDTO();
@@ -154,7 +191,7 @@ public class AccountControllerTest {
         .andExpect(jsonPath("$.active", is(true)))
         .andExpect(jsonPath("$.bank", is("test")))
         .andExpect(jsonPath("$.name", is("testname")))
-        .andExpect(jsonPath("$.userId", is("Subject-111")));
+        .andExpect(jsonPath("$.userId", is(TestUtils.USER_ID)));
 
   }
 
@@ -173,7 +210,7 @@ public class AccountControllerTest {
         .andExpect(jsonPath("$.active", is(true)))
         .andExpect(jsonPath("$.bank", is("test")))
         .andExpect(jsonPath("$.name", is(name)))
-        .andExpect(jsonPath("$.userId", is("Subject-111")));
+        .andExpect(jsonPath("$.userId", is(TestUtils.USER_ID)));
 
   }
 

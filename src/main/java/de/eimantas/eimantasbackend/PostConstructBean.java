@@ -1,8 +1,11 @@
 package de.eimantas.eimantasbackend;
 
 import de.eimantas.eimantasbackend.entities.Account;
+import de.eimantas.eimantasbackend.entities.AccountHistory;
 import de.eimantas.eimantasbackend.entities.Project;
+import de.eimantas.eimantasbackend.helpers.EntityHelper;
 import de.eimantas.eimantasbackend.helpers.PopulateStuff;
+import de.eimantas.eimantasbackend.repo.AccountHistoryRepository;
 import de.eimantas.eimantasbackend.service.AccountService;
 import de.eimantas.eimantasbackend.service.ProjectService;
 import org.slf4j.LoggerFactory;
@@ -13,9 +16,12 @@ import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.inject.Inject;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import static org.springframework.transaction.annotation.Isolation.READ_UNCOMMITTED;
 
@@ -30,6 +36,9 @@ public class PostConstructBean implements ApplicationRunner {
 
   @Autowired
   private ProjectService projectService;
+
+  @Inject
+  private AccountHistoryRepository accountHistoryRepository;
 
   @Autowired
   private Environment environment;
@@ -59,6 +68,16 @@ public class PostConstructBean implements ApplicationRunner {
     project.setRate(BigDecimal.valueOf(86));
 
     logger.info("Saving Project: " + projectService.saveProjectInTest(project).toString());
+
+    List<AccountHistory> histories = new ArrayList<>();
+    for (int i=0;i<5;i++) {
+      AccountHistory history = EntityHelper.createHistory(1);
+      history.setUserId(PopulateStuff.TEST_USER_ID);
+      history.setAmount(BigDecimal.valueOf(i));
+      histories.add(history);
+    }
+
+    accountHistoryRepository.saveAll(histories);
 
   }
 

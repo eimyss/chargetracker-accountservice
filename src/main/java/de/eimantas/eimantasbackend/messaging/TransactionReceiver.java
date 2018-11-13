@@ -35,7 +35,6 @@ public class TransactionReceiver {
     try {
       json = new JSONObject((String) message);
       String type = getType(json);
-
       if (type.equalsIgnoreCase("expense")) {
         service.processTransaction(json);
       } else {

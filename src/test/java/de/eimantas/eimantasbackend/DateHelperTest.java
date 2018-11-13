@@ -4,6 +4,7 @@ import de.eimantas.eimantasbackend.helpers.DateHelper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -24,7 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ActiveProfiles("test")
 @Transactional
 public class DateHelperTest {
-
+  private final org.slf4j.Logger logger = LoggerFactory.getLogger(this.getClass());
 
   @Before
   public void setup() {
@@ -76,7 +77,7 @@ public class DateHelperTest {
     LocalDateTime ago = today.minus(Period.ofMonths(6));
 
     boolean answer = DateHelper.isInMonth(6, ago.toInstant(ZoneOffset.UTC));
-    assertThat(answer).isEqualTo(false);
+    assertThat(answer).isEqualTo(true);
 
   }
 
