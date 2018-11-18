@@ -19,6 +19,8 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.inject.Inject;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -73,6 +75,7 @@ public class PostConstructBean implements ApplicationRunner {
     for (int i=0;i<5;i++) {
       AccountHistory history = EntityHelper.createHistory(1);
       history.setUserId(PopulateStuff.TEST_USER_ID);
+      history.setCreateDate(LocalDateTime.now().minusDays(5L));
       history.setAmount(BigDecimal.valueOf(i));
       histories.add(history);
     }
