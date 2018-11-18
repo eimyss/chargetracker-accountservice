@@ -75,7 +75,7 @@ public class PostConstructBean implements ApplicationRunner {
     for (int i=0;i<5;i++) {
       AccountHistory history = EntityHelper.createHistory(1);
       history.setUserId(PopulateStuff.TEST_USER_ID);
-      history.setCreateDate(LocalDateTime.now().minusDays(5L));
+      history.setCreateDate(LocalDateTime.now().minusDays(i));
       history.setAmount(BigDecimal.valueOf(i));
       histories.add(history);
     }
