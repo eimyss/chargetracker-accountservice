@@ -70,7 +70,7 @@ public class ProjectService {
     return Optional.empty();
   }
 
-  public Stream<AddressProject> getProjectAddresses(KeycloakAuthenticationToken principal) {
+  public List<AddressProject> getProjectAddresses(KeycloakAuthenticationToken principal) {
     return addressRepository.findByUserId(securityService.getUserIdFromPrincipal(principal));
 
   }

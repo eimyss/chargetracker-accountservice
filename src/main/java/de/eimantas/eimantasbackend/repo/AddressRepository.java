@@ -13,7 +13,7 @@ import java.util.stream.Stream;
 
 public interface AddressRepository extends CrudRepository<AddressProject, Long> {
 
-  Stream<AddressProject> findByUserId(String userId);
+  List<AddressProject> findByUserId(String userId);
 
   Optional<AddressProject> findByIdAndUserId(long accountId, String userIdFromPrincipal);
 

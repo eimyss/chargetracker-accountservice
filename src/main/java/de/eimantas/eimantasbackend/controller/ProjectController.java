@@ -93,10 +93,10 @@ public class ProjectController {
   public List<AddressProject> getAllAddresses(Principal principal)
       throws NonExistingEntityException {
 
-    Stream<AddressProject> addressProjectStream = projectService
+    List<AddressProject> addressProjectStream = projectService
         .getProjectAddresses((KeycloakAuthenticationToken) principal);
-    logger.debug("got: " + addressProjectStream.count() + " addresses");
-    return addressProjectStream.collect(Collectors.toList());
+    logger.debug("got: " + addressProjectStream.size() + " addresses");
+    return addressProjectStream;
 
   }
 
