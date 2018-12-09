@@ -15,21 +15,20 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class Project {
+public class AddressProject {
 
   @Id
   @GeneratedValue
   private Long id;
   private LocalDate createDate;
-  private LocalDate expireDate;
-  private LocalDate updateDate;
-  private long addressId;
   private boolean active;
-  private long refBankAccountId;
+  private String city;
+  private String streetName;
   private @NonNull
   String name;
-  private BigDecimal rate;
+  private String houseNumber;
+  private String postalCode;
   private String userId;
-
+  private double distanceFromHome;
 
 }

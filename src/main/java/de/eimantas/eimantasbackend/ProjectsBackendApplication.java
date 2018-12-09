@@ -22,13 +22,13 @@ import java.util.Collections;
 
 @EnableDiscoveryClient
 @SpringBootApplication
-public class EimantasBackendApplication {
+public class ProjectsBackendApplication {
 
   @Value("${spring.application.name}")
   private String appname;
 
   public static void main(String[] args) {
-    SpringApplication.run(EimantasBackendApplication.class, args);
+    SpringApplication.run(ProjectsBackendApplication.class, args);
   }
 
   @Bean

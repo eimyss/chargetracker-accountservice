@@ -2,10 +2,12 @@ package de.eimantas.eimantasbackend;
 
 import de.eimantas.eimantasbackend.entities.Account;
 import de.eimantas.eimantasbackend.entities.AccountHistory;
+import de.eimantas.eimantasbackend.entities.AddressProject;
 import de.eimantas.eimantasbackend.entities.Project;
 import de.eimantas.eimantasbackend.helpers.EntityHelper;
 import de.eimantas.eimantasbackend.helpers.PopulateStuff;
 import de.eimantas.eimantasbackend.repo.AccountHistoryRepository;
+import de.eimantas.eimantasbackend.repo.AddressRepository;
 import de.eimantas.eimantasbackend.service.AccountService;
 import de.eimantas.eimantasbackend.service.ProjectService;
 import org.slf4j.LoggerFactory;
@@ -40,6 +42,9 @@ public class PostConstructBean implements ApplicationRunner {
   private ProjectService projectService;
 
   @Inject
+  private AddressRepository addressRepository;
+
+  @Inject
   private AccountHistoryRepository accountHistoryRepository;
 
   @Autowired
@@ -65,6 +70,7 @@ public class PostConstructBean implements ApplicationRunner {
     project.setCreateDate(LocalDate.now());
     project.setUserId(PopulateStuff.TEST_USER_ID);
     project.setActive(true);
+    project.setAddressId(8L);
     project.setName("Generated");
     project.setRefBankAccountId(1);
     project.setRate(BigDecimal.valueOf(86));
@@ -82,9 +88,22 @@ public class PostConstructBean implements ApplicationRunner {
 
     accountHistoryRepository.saveAll(histories);
 
+    AddressProject addressProject = new AddressProject();
+    addressProject.setActive(true);
+    addressProject.setCity("Bonn");
+    addressProject.setDistanceFromHome(63.2);
+    addressProject.setCreateDate(LocalDate.now());
+    addressProject.setHouseNumber("100A");
+    addressProject.setName("Bonn Test");
+    addressProject.setPostalCode("53532");
+    addressProject.setStreetName("Test Straße 1");
+    addressProject.setUserId(PopulateStuff.TEST_USER_ID);
+
+    addressRepository.save(addressProject);
+    logger.info("Adress Saved: " + addressProject.toString());
+
   }
 
-  // we allow read stuff that is not commited, because by generation of subsequent entities, it comes to id collision
   @Override
   @Transactional(isolation = READ_UNCOMMITTED)
   public void run(ApplicationArguments args) throws Exception {
