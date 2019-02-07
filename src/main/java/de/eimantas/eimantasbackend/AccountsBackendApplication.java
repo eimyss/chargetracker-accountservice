@@ -9,7 +9,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.actuate.autoconfigure.metrics.MeterRegistryCustomizer;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
-import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.Ordered;
 import org.springframework.security.data.repository.query.SecurityEvaluationContextExtension;
@@ -20,15 +19,14 @@ import org.springframework.web.filter.CorsFilter;
 
 import java.util.Collections;
 
-@EnableDiscoveryClient
 @SpringBootApplication
-public class ProjectsBackendApplication {
+public class AccountsBackendApplication {
 
   @Value("${spring.application.name}")
   private String appname;
 
   public static void main(String[] args) {
-    SpringApplication.run(ProjectsBackendApplication.class, args);
+    SpringApplication.run(AccountsBackendApplication.class, args);
   }
 
   @Bean
@@ -69,8 +67,6 @@ public class ProjectsBackendApplication {
     CorsConfiguration config = new CorsConfiguration();
     config.setAllowCredentials(true);
     config.setAllowedOrigins(Collections.singletonList("*"));
-    config.setAllowedMethods(Collections.singletonList("*"));
-    config.setAllowedHeaders(Collections.singletonList("*"));
     source.registerCorsConfiguration("/**", config);
     FilterRegistrationBean bean = new FilterRegistrationBean(new CorsFilter(source));
     bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
