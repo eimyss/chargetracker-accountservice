@@ -1,0 +1,19 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: expenses
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: expenses
+    spec:
+      containers:
+        - name: expenses
+          image: docker-registry.eimantas.server/expenses-account:1.{NR} 
+          ports:
+            - name: http-port
+              containerPort: 8080
+      imagePullSecrets:
+        - name: local-registry
