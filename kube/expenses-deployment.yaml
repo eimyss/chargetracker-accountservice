@@ -11,9 +11,10 @@ spec:
     spec:
       containers:
         - name: expenses
-          image: docker-registry.eimantas.server/expenses-account:1.{NR} 
+          image: docker-registry.eimantas.server/expenses-account:1.33 
+          imagePullPolicy: IfNotPresent
           ports:
             - name: http-port
               containerPort: 8080
       imagePullSecrets:
-        - name: local-registry
+        - name: regcred1
